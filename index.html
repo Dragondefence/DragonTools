@@ -1,0 +1,1430 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Dragon Defence">
+<meta name="theme-color" content="#ffffff">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Dragon Defence Security Tools</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Free security checks from Dragon Defence: email breach check, password breach check and QR code check.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: white brand bar with the Dragon Defence logo → charcoal hero with steel stripes and a scanner dial → tool cards, or a tool's results as panels */
+:root {
+  --bg: #f2f4f6;
+  --surface: #ffffff;
+  --ink: #18222d;
+  --muted: #5d6b78;
+  --line: #d9dee4;
+  --steer-cyan: #f29a2e;
+  --steer-blue: #3d5a73;
+  --hero: #1a2633;
+  --hero-2: #2e4258;
+  --hero-ink: #ffffff;
+  --hero-muted: #bcc7d2;
+  --accent: #3d5a73;
+  --bad: #d23a26;
+  --bad-bg: #fcebe8;
+  --warn: #b26a00;
+  --warn-bg: #fdf2de;
+  --good: #1b8a50;
+  --good-bg: #e3f5eb;
+  --info: #3d5a73;
+  --info-bg: #e8eef4;
+  --track: #e5e9ee;
+  --font-display: "Exo 2", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d131a; --surface: #171f29; --ink: #e6eef5; --muted: #98a8b7; --line: #2a3644;
+    --hero: #0f1720; --hero-2: #2a3d52; --hero-muted: #a9b6c3; --accent: #f29a2e;
+    --bad: #ff8b77; --bad-bg: #3a1b18; --warn: #f3b75c; --warn-bg: #352710; --good: #6fd59c; --good-bg: #12301f;
+    --info: #a9c3da; --info-bg: #1b2836; --track: #252f3b; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d131a; --surface: #171f29; --ink: #e6eef5; --muted: #98a8b7; --line: #2a3644;
+  --hero: #0f1720; --hero-2: #2a3d52; --hero-muted: #a9b6c3; --accent: #f29a2e;
+  --bad: #ff8b77; --bad-bg: #3a1b18; --warn: #f3b75c; --warn-bg: #352710; --good: #6fd59c; --good-bg: #12301f;
+  --info: #a9c3da; --info-bg: #1b2836; --track: #252f3b; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.inner { max-width: 1040px; margin: 0 auto; }
+a { color: var(--accent); }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--steer-cyan); outline-offset: 2px; }
+
+/* Brand bar (logo keeps its white ground in both themes) */
+.brandbar { background: #ffffff; border-bottom: 4px solid var(--steer-cyan); }
+.brandbar .inner { display: flex; align-items: center; justify-content: space-between; gap: 10px 20px; padding-block: 10px; flex-wrap: wrap; }
+.brandbar .logo { display: block; flex: 0 0 auto; }
+.brandbar img { height: 54px; width: auto; display: block; }
+nav.tools { display: flex; gap: 4px; overflow-x: auto; max-width: 100%; scrollbar-width: none; }
+nav.tools::-webkit-scrollbar { display: none; }
+nav.tools a { font-size: 13.5px; font-weight: 500; color: #3c4b58; text-decoration: none; padding: 8px 12px; border-radius: 8px; white-space: nowrap; }
+nav.tools a:hover { background: #eef2f6; color: #3d5a73; }
+nav.tools a[aria-current="page"] { background: #3d5a73; color: #ffffff; }
+
+/* Phone: compact header + bottom tab bar */
+nav.tabbar { display: none; }
+@media (max-width: 700px) {
+  .brandbar .inner { padding-block: 8px; flex-wrap: nowrap; }
+  .brandbar img { height: 40px; }
+  .brandbar .apptitle { display: block; }
+  nav.tools { display: none; }
+  nav.tabbar {
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    background: var(--surface); border-top: 1px solid var(--line);
+    padding: 6px max(6px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px));
+    box-shadow: 0 -6px 20px -14px rgba(20,30,40,.5);
+  }
+  nav.tabbar a { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0; text-decoration: none; color: var(--muted); font-size: 10px; font-weight: 500; border-radius: 8px; min-width: 0; -webkit-tap-highlight-color: transparent; }
+  nav.tabbar a span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  nav.tabbar svg { width: 22px; height: 22px; }
+  nav.tabbar a[aria-current="page"] { color: var(--accent); }
+  nav.tabbar a[aria-current="page"] svg { stroke-width: 2.3; }
+  body { padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px)); }
+  .hero .inner { padding-block: 24px 26px; gap: 18px; }
+  .hero .dial-wrap { display: flex !important; }
+  .hero .dial { max-width: 170px; }
+  .lede { font-size: 15px; margin-bottom: 18px; }
+  main .inner { padding-block: 22px 18px; gap: 16px; }
+  .panel, .verdict { padding: 16px; }
+  .tool-card { grid-template-columns: 56px minmax(0, 1fr); padding: 16px; gap: 14px; }
+  .tool-card .art { width: 56px; height: 56px; border-radius: 12px; }
+  .tool-card .art svg { width: 34px; height: 34px; }
+}
+.apptitle { display: none; font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #3d5a73; border: 1px solid #cfd8e1; padding: 5px 10px; border-radius: 999px; white-space: nowrap; }
+
+/* Hero */
+.hero { position: relative; overflow: hidden; color: var(--hero-ink); background: radial-gradient(120% 140% at 85% 20%, var(--hero-2) 0%, var(--hero) 60%); }
+.ribbons { position: absolute; inset: 0; pointer-events: none; }
+.ribbons i { position: absolute; right: -10%; height: 46px; width: 70%; border-radius: 0 0 0 120px; transform: skewY(-14deg); }
+.ribbons i:nth-child(1) { top: 6%;  background: linear-gradient(90deg, transparent, rgba(120,140,160,.35)); }
+.ribbons i:nth-child(2) { top: 26%; background: linear-gradient(90deg, transparent, rgba(80,100,122,.55)); }
+.ribbons i:nth-child(3) { top: 46%; background: linear-gradient(90deg, transparent 10%, rgba(242,154,46,.28)); }
+.ribbons i:nth-child(4) { top: 66%; background: linear-gradient(90deg, transparent 20%, rgba(160,176,192,.22)); }
+.hero .inner { position: relative; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr); gap: 32px; align-items: center; padding-block: 44px 52px; }
+@media (max-width: 780px) { .hero .inner { grid-template-columns: 1fr; padding-block: 32px 36px; } .dial-wrap { display: none; } }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--steer-cyan); margin: 0 0 12px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(32px, 6vw, 54px); line-height: 1.03; margin: 0 0 14px; text-wrap: balance; letter-spacing: -0.015em; }
+h1 .hl { color: var(--steer-cyan); }
+.lede { color: var(--hero-muted); max-width: 54ch; margin: 0 0 22px; font-size: 16px; }
+form.search { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); border-radius: 14px; padding: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.field { flex: 1 1 240px; min-width: 0; position: relative; display: flex; }
+.field input { flex: 1; min-width: 0; font: inherit; font-family: var(--font-mono); font-size: 15px; padding: 14px 16px; border: 0; border-radius: 9px; background: #ffffff; color: #18222d; }
+.field input::placeholder { color: #8a97a3; }
+.field .reveal { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font: inherit; font-size: 12.5px; font-weight: 600; background: #eef3f7; color: #3d5a73; border: 0; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+.field.has-reveal input { padding-right: 70px; }
+button.primary { font: inherit; font-weight: 600; padding: 14px 22px; border-radius: 9px; border: 0; background: var(--steer-cyan); color: #0f1720; cursor: pointer; flex: 0 0 auto; }
+button.primary:hover { background: #4cc4ee; }
+button.primary:disabled { opacity: .65; cursor: progress; }
+.hero .fine { font-size: 12.5px; color: var(--hero-muted); margin: 12px 0 0; max-width: 62ch; }
+.hero .fine a, .linkish { color: #ffffff; }
+.linkish { background: none; border: 0; padding: 0; font: inherit; text-decoration: underline; cursor: pointer; }
+.hero-cta { display: flex; gap: 10px; flex-wrap: wrap; }
+.hero-cta a { text-decoration: none; font-weight: 600; padding: 12px 18px; border-radius: 9px; }
+.hero-cta a.solid { background: var(--steer-cyan); color: #0f1720; }
+.hero-cta a.ghost { color: #ffffff; border: 1px solid rgba(255,255,255,.35); }
+
+/* Dial */
+.dial-wrap { display: flex; justify-content: center; }
+.dial { width: 100%; max-width: 270px; aspect-ratio: 1; }
+.dial .sweep { transform-origin: 140px 140px; animation: sweep 4s linear infinite; }
+.dial.scanning .sweep { animation-duration: 1.1s; }
+@keyframes sweep { to { transform: rotate(360deg); } }
+.dial text { font-family: var(--font-display); fill: #ffffff; }
+.dial .sub { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .12em; fill: var(--hero-muted); }
+
+/* Content */
+main .inner { padding-block: 30px 24px; display: flex; flex-direction: column; gap: 22px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; min-width: 0; }
+.panel h3 { font-family: var(--font-display); font-size: 19px; margin: 0 0 4px; }
+.hint { font-size: 12.5px; color: var(--muted); margin: 0 0 14px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+
+.verdict { border-radius: 14px; padding: 22px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px 24px; align-items: center; background: var(--surface); border: 1px solid var(--line); position: relative; overflow: hidden; }
+.verdict::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 6px; background: var(--state, var(--accent)); }
+.verdict.bad { --state: var(--bad); } .verdict.good { --state: var(--good); } .verdict.err, .verdict.warn { --state: var(--warn); }
+.verdict .txt { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding-left: 6px; }
+.tag { font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; font-weight: 500; color: var(--state); display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.verdict h2 { font-family: var(--font-display); font-size: clamp(22px, 3.4vw, 28px); line-height: 1.15; margin: 0; text-wrap: balance; overflow-wrap: anywhere; }
+.verdict p { margin: 0; max-width: 62ch; color: var(--muted); }
+.example-flag { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; background: var(--ink); color: var(--bg); padding: 2px 8px; border-radius: 4px; }
+@media (max-width: 620px) { .verdict { grid-template-columns: 1fr; } }
+
+.gauge { width: 190px; max-width: 100%; }
+.gauge text { font-family: var(--font-display); fill: var(--ink); }
+.gauge .lbl { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; fill: var(--muted); }
+
+.figures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.fig { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; }
+.fig b { font-family: var(--font-display); font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.05; color: var(--fc, var(--ink)); overflow-wrap: anywhere; }
+.fig span { font-size: 12px; color: var(--muted); }
+@media (max-width: 640px) { .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.chart svg { width: 100%; height: auto; display: block; }
+.chart text { font-family: var(--font-mono); font-size: 10px; fill: var(--muted); }
+
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: flex; flex-direction: column; gap: 4px; }
+.bar-row .k { font-size: 13.5px; display: flex; justify-content: space-between; gap: 8px; }
+.bar-row .k b { font-weight: 500; }
+.bar-row .k em { font-style: normal; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.bar-row .t { height: 8px; border-radius: 999px; background: var(--track); overflow: hidden; }
+.bar-row .t i { display: block; height: 100%; border-radius: inherit; background: var(--steer-cyan); width: 0; transition: width .7s cubic-bezier(.2,.8,.2,1); }
+.bar-row.hot .t i { background: var(--bad); }
+
+.ledger { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.entry { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 6px 14px; align-items: start; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.avatar { width: 48px; height: 48px; border-radius: 10px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 18px; color: #ffffff; }
+.entry .body { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.entry .top { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.entry .name { font-weight: 600; font-size: 16px; }
+.entry .dom { font-family: var(--font-mono); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.entry .desc { font-size: 13.5px; color: var(--muted); margin: 0; overflow-wrap: anywhere; }
+.entry .meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.entry .yr { font-family: var(--font-display); font-weight: 700; font-size: 20px; font-variant-numeric: tabular-nums; color: var(--muted); }
+@media (max-width: 520px) { .entry { grid-template-columns: 40px minmax(0, 1fr); align-items: center; } .avatar { width: 40px; height: 40px; font-size: 15px; grid-column: 1; grid-row: 1; } .entry .yr { grid-column: 2; grid-row: 1; justify-self: end; font-size: 15px; } .entry .body { grid-column: 1 / -1; grid-row: 2; } }
+.pill { font-family: var(--font-mono); font-size: 11px; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--line); color: var(--muted); background: var(--surface); }
+.pill.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); background: var(--bad-bg); }
+.pill.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); background: var(--warn-bg); }
+.pill.good { color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, transparent); background: var(--good-bg); }
+
+/* Check list rows */
+.checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.check { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 4px 12px; padding: 14px 0; border-top: 1px solid var(--line); align-items: start; }
+.check:first-child { border-top: 0; padding-top: 4px; }
+.check .ico { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--sbg); color: var(--s); }
+.check .ico svg { width: 14px; height: 14px; }
+.check.pass { --s: var(--good); --sbg: var(--good-bg); }
+.check.warn { --s: var(--warn); --sbg: var(--warn-bg); }
+.check.fail { --s: var(--bad); --sbg: var(--bad-bg); }
+.check.info { --s: var(--info); --sbg: var(--info-bg); }
+.check .body { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.check .name { font-weight: 600; }
+.check .what { font-size: 13.5px; color: var(--muted); margin: 0; }
+.check .rec { font-family: var(--font-mono); font-size: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; overflow-x: auto; white-space: pre; max-width: 100%; }
+.check .state { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--s); padding-top: 4px; white-space: nowrap; }
+@media (max-width: 520px) { .check { grid-template-columns: 30px minmax(0, 1fr) auto; } .check .ico { grid-column: 1; grid-row: 1; } .check .body { grid-column: 2; grid-row: 1; } .check .state { grid-column: 3; grid-row: 1; } .check .rec { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-all; } }
+
+/* Steps + CTA */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; counter-reset: s; }
+.steps li { counter-increment: s; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 14px; font-size: 14px; display: flex; flex-direction: column; gap: 6px; }
+.steps li::before { content: counter(s); font-family: var(--font-display); font-weight: 800; font-size: 15px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--steer-cyan); color: #0f1720; }
+.steps li b { font-weight: 600; }
+.cta { border-radius: 14px; padding: 22px; display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between; color: #ffffff; background: linear-gradient(110deg, var(--steer-blue), #5a7690 60%, var(--steer-cyan)); }
+.cta p { margin: 0; max-width: 54ch; font-size: 15.5px; }
+.cta a { font-weight: 600; color: #1a2633; background: #ffffff; padding: 11px 18px; border-radius: 9px; text-decoration: none; white-space: nowrap; }
+.loading { display: flex; gap: 12px; align-items: center; color: var(--muted); padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.spinner { width: 18px; height: 18px; border: 2.5px solid var(--steer-cyan); border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; flex: 0 0 auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.links { display: flex; flex-wrap: wrap; gap: 10px; }
+.links a { font-size: 13.5px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); background: var(--bg); padding: 9px 12px; border-radius: 9px; }
+
+/* Dashboard */
+.tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 720px) { .tool-grid { grid-template-columns: 1fr; } }
+.tool-card { position: relative; display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 16px; padding: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; text-decoration: none; color: inherit; transition: border-color .2s, transform .2s, box-shadow .2s; overflow: hidden; }
+.tool-card:hover { border-color: var(--steer-cyan); transform: translateY(-2px); box-shadow: 0 10px 28px -16px rgba(61,90,115,.45); }
+.tool-card .art { width: 76px; height: 76px; border-radius: 14px; background: linear-gradient(140deg, var(--hero-2), var(--hero)); display: grid; place-items: center; }
+.tool-card .art svg { width: 44px; height: 44px; }
+.tool-card .copy { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.tool-card .q { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.tool-card h3 { font-family: var(--font-display); font-size: 21px; margin: 0; line-height: 1.15; }
+.tool-card p { margin: 0; font-size: 14px; color: var(--muted); }
+.tool-card .go { margin-top: 6px; font-weight: 600; font-size: 14px; color: var(--accent); }
+.tool-card .chk { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.why { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 720px) { .why { grid-template-columns: 1fr; } }
+.why div { padding: 4px 0; }
+.why b { display: block; font-family: var(--font-display); font-size: 34px; color: var(--accent); line-height: 1.05; font-variant-numeric: tabular-nums; }
+.why span { font-size: 13.5px; color: var(--muted); }
+
+/* Password specifics */
+.meter { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 4px 0 10px; }
+.meter i { height: 10px; border-radius: 4px; background: var(--track); transition: background .3s; }
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; align-items: stretch; }
+.flow div { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 4px; position: relative; min-width: 0; }
+.flow b { font-size: 13px; }
+.flow code { font-family: var(--font-mono); font-size: 12px; color: var(--accent); overflow-wrap: anywhere; }
+.flow span { font-size: 12px; color: var(--muted); }
+@media (max-width: 720px) { .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.traits { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Speed test */
+.tool-card.wide { grid-column: 1 / -1; }
+.speedgauges { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+@media (max-width: 600px) { .speedgauges { grid-template-columns: 1fr; } }
+.sg { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px 10px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.sg .cap { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); align-self: flex-start; display: flex; align-items: center; gap: 8px; }
+.sg .cap i { width: 10px; height: 10px; border-radius: 50%; }
+.sg svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.sg svg text { font-family: var(--font-display); fill: var(--ink); }
+.sg svg .tick { font-family: var(--font-mono); font-size: 9px; fill: var(--muted); }
+.sg svg .unit { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; fill: var(--muted); }
+.start-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.start-row button.primary { font-size: 17px; padding: 16px 30px; }
+.phase { font-family: var(--font-mono); font-size: 12.5px; color: var(--hero-muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+
+/* DNS lookup */
+.who-runs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .who-runs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.who-runs div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 4px; min-width: 0; position: relative; overflow: hidden; }
+.who-runs div::after { content: ""; position: absolute; inset: auto 0 0 0; height: 3px; background: var(--steer-cyan); }
+.who-runs span { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.who-runs b { font-family: var(--font-display); font-size: 19px; line-height: 1.15; overflow-wrap: anywhere; }
+.who-runs em { font-style: normal; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.rtable-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+table.rtable { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rtable th { text-align: left; font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--bg); padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.rtable td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+.rtable tr:first-child td { border-top: 0; }
+.rtable td.n { font-family: var(--font-mono); font-size: 12.5px; white-space: nowrap; }
+.rtable td.v { font-family: var(--font-mono); font-size: 12.5px; overflow-wrap: anywhere; word-break: break-word; min-width: 220px; }
+.rtable td.ttl { font-family: var(--font-mono); font-size: 12px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rtype { font-family: var(--font-mono); font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 4px; color: #ffffff; white-space: nowrap; }
+.src { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; font-family: var(--font-body); }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.toolbar .spacer { flex: 1; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filters input { flex: 1 1 200px; min-width: 0; font: inherit; font-size: 14px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.chipbtn { font: inherit; font-size: 12.5px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.chipbtn i { width: 8px; height: 8px; border-radius: 50%; }
+.chipbtn[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+@media (max-width: 700px) {
+  .rtable-wrap { overflow-x: visible; }
+  .rtable thead { display: none; }
+  .rtable, .rtable tbody { display: block; }
+  .rtable tr { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 6px 10px; padding: 11px 12px; border-top: 1px solid var(--line); }
+  .rtable tr:first-child { border-top: 0; }
+  .rtable td { display: block; padding: 0; border: 0; }
+  .rtable td.n { white-space: normal; overflow-wrap: anywhere; font-weight: 500; }
+  .rtable td.v { grid-column: 1 / -1; min-width: 0; background: var(--bg); border-radius: 6px; padding: 7px 9px; font-size: 12px; }
+  .rtable td[colspan] { grid-column: 1 / -1; }
+  .toolbar .spacer { display: none; }
+}
+.btn2 { font: inherit; font-size: 13px; font-weight: 600; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--accent); cursor: pointer; }
+
+/* Share, report, expiry */
+.sharebtn { align-self: flex-start; margin-top: 6px; font: inherit; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; padding: 8px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--accent); cursor: pointer; }
+.sharebtn svg { width: 15px; height: 15px; }
+.secs { display: flex; flex-direction: column; }
+.sec-row { display: grid; grid-template-columns: minmax(0, 1fr) 54px auto; gap: 6px 14px; align-items: center; padding: 13px 0; border-top: 1px solid var(--line); }
+.sec-row:first-child { border-top: 0; padding-top: 4px; }
+.sec-row .nm { font-weight: 600; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.sec-row .nm small { font-weight: 400; font-size: 12.5px; color: var(--muted); }
+.sec-row .t { height: 8px; border-radius: 999px; background: var(--track); overflow: hidden; }
+.sec-row .t i { display: block; height: 100%; width: 0; border-radius: inherit; transition: width .8s cubic-bezier(.2,.8,.2,1); }
+.sec-row .sc { font-family: var(--font-display); font-weight: 700; font-size: 22px; text-align: right; font-variant-numeric: tabular-nums; }
+.sec-row .sc.na { font-size: 13px; color: var(--muted); font-family: var(--font-body); font-weight: 500; }
+.sec-row button { font: inherit; font-size: 13px; font-weight: 600; color: var(--accent); background: none; border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; cursor: pointer; white-space: nowrap; }
+@media (max-width: 520px) { .sec-row { grid-template-columns: minmax(0, 1fr) auto; } .sec-row button { grid-column: 1 / -1; justify-self: start; } }
+.lettergrade { width: 150px; max-width: 100%; }
+.lettergrade text { font-family: var(--font-display); fill: var(--ink); }
+.lettergrade .lbl { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; fill: var(--muted); }
+.countdowns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+@media (max-width: 600px) { .countdowns { grid-template-columns: 1fr; } }
+.cd { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 16px; align-items: center; }
+.cd svg { width: 112px; height: 112px; }
+.cd svg text { font-family: var(--font-display); fill: var(--ink); }
+.cd svg .lbl { font-family: var(--font-mono); font-size: 9px; letter-spacing: .1em; fill: var(--muted); }
+.cd .cap { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.cd b { display: block; font-family: var(--font-display); font-size: 21px; line-height: 1.2; margin: 4px 0; overflow-wrap: anywhere; }
+.cd span { font-size: 13px; color: var(--muted); }
+dl.kv { display: grid; grid-template-columns: minmax(110px, auto) minmax(0, 1fr); gap: 8px 16px; margin: 0; font-size: 14px; }
+dl.kv dt { color: var(--muted); }
+dl.kv dd { margin: 0; overflow-wrap: anywhere; }
+dl.kv dd code { font-family: var(--font-mono); font-size: 12.5px; }
+@media (max-width: 460px) { dl.kv { grid-template-columns: 1fr; gap: 2px; } dl.kv dd { margin-bottom: 8px; } }
+
+/* Builder, saved domains, blacklist, generator */
+.group-h { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 10px 0 -8px; }
+.opts { display: flex; flex-direction: column; gap: 16px; }
+.checks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.cbox { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); cursor: pointer; font-size: 14px; font-weight: 500; }
+.cbox input { accent-color: var(--steer-blue); width: 18px; height: 18px; margin: 1px 0 0; flex: 0 0 auto; }
+.cbox span { min-width: 0; }
+.cbox small { display: block; font-weight: 400; color: var(--muted); font-family: var(--font-mono); font-size: 11.5px; overflow-wrap: anywhere; margin-top: 2px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.field2 { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field2 > label { font-size: 13px; font-weight: 600; }
+.field2 input, .field2 select, .field2 textarea { font: inherit; font-size: 14px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); min-width: 0; width: 100%; }
+.field2 textarea { font-family: var(--font-mono); font-size: 12.5px; resize: vertical; }
+.fields2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.recout { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin-top: 12px; }
+.recout .r { display: grid; grid-template-columns: 62px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 10px 12px; border-top: 1px solid var(--line); }
+.recout .r:first-child { border-top: 0; }
+.recout .k { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.recout code { font-family: var(--font-mono); font-size: 13px; overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; }
+.copybtn { font: inherit; font-size: 12.5px; font-weight: 600; color: var(--accent); background: var(--surface); border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; cursor: pointer; white-space: nowrap; }
+.copybtn:disabled { opacity: .6; }
+.note { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+.warnnote { color: var(--warn); }
+.current { margin-top: 14px; padding: 10px 12px; border-radius: 10px; background: var(--info-bg); font-size: 13px; overflow-wrap: anywhere; }
+.current code { font-family: var(--font-mono); font-size: 12.5px; white-space: pre-wrap; word-break: break-all; }
+.wlist { display: flex; flex-direction: column; }
+.wrow { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 8px 14px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
+.wrow:first-child { border-top: 0; padding-top: 4px; }
+.wgrade { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 22px; border: 4px solid var(--gc); color: var(--gc); }
+.wmid { min-width: 0; }
+.wrow .dn { font-weight: 600; font-size: 16px; overflow-wrap: anywhere; }
+.wrow .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.wrow .acts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 560px) { .wrow { grid-template-columns: 52px minmax(0, 1fr); } .wrow .acts { grid-column: 1 / -1; justify-content: flex-start; } }
+.bl-ip { padding: 14px 0; border-top: 1px solid var(--line); }
+.bl-ip:first-of-type { border-top: 0; }
+.bl-ip h4 { margin: 0; font-family: var(--font-mono); font-size: 15px; font-weight: 500; overflow-wrap: anywhere; }
+.bl-ip small { color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
+.bl-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.gen { display: flex; flex-direction: column; gap: 14px; }
+.genout { font-family: var(--font-mono); font-size: 19px; line-height: 1.4; padding: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; overflow-wrap: anywhere; word-break: break-all; user-select: all; -webkit-user-select: all; }
+.genrow { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; font-size: 14px; }
+.genrow input[type=range] { accent-color: var(--steer-blue); flex: 1 1 160px; min-width: 0; }
+.genrow .val { font-family: var(--font-mono); font-size: 13px; min-width: 70px; }
+.genrow label.tg { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+.genrow label.tg input { accent-color: var(--steer-blue); width: 18px; height: 18px; margin: 0; }
+.btnp { font: inherit; font-weight: 600; font-size: 14px; padding: 10px 16px; border-radius: 9px; border: 0; background: var(--steer-cyan); color: #0f1720; cursor: pointer; }
+
+/* Service status */
+.svcs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .svcs { grid-template-columns: 1fr; } }
+.svc { background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--sc, var(--line)); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.svc.lv-ok { --sc: var(--good); } .svc.lv-minor { --sc: var(--warn); } .svc.lv-maint { --sc: var(--info); }
+.svc.lv-major, .svc.lv-critical { --sc: var(--bad); background: var(--bad-bg); border-color: color-mix(in srgb, var(--bad) 45%, transparent); border-left-color: var(--bad); }
+.svc-h { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.svc-h .avatar { width: 40px; height: 40px; font-size: 15px; }
+.svc-n { min-width: 0; display: flex; flex-direction: column; }
+.svc-n b { font-size: 16px; }
+.svc-n span { font-size: 12.5px; color: var(--muted); }
+.svc-d { margin: 0; font-size: 14px; color: var(--muted); }
+.incs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.incs li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; display: flex; flex-direction: column; gap: 4px; }
+.inc-top { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; justify-content: space-between; }
+.inc-top b { font-weight: 600; }
+.inc-meta { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); }
+.incs p { margin: 0; color: var(--muted); overflow-wrap: anywhere; }
+.incs a, .svc-links a { font-size: 13px; font-weight: 600; text-decoration: none; }
+.svc-links { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+@media (max-width: 420px) { .svc-h { grid-template-columns: 40px minmax(0, 1fr); } .svc-h .pill { grid-column: 2; justify-self: start; } }
+.alert-banner { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: space-between; padding: 14px 16px; border-radius: 14px; text-decoration: none; color: var(--ink); background: var(--bad-bg); border: 1px solid color-mix(in srgb, var(--bad) 45%, transparent); }
+.alert-banner.minor { background: var(--warn-bg); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+.alert-banner b { color: var(--bad); font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; display: block; }
+.alert-banner.minor b { color: var(--warn); }
+.alert-banner span { font-weight: 600; }
+.alert-banner em { font-style: normal; font-weight: 600; color: var(--accent); white-space: nowrap; }
+a.alert-major, a.alert-minor { position: relative; }
+nav.tabbar a.alert-major::after, nav.tabbar a.alert-minor::after { content: ""; position: absolute; top: 3px; left: calc(50% + 8px); width: 9px; height: 9px; border-radius: 50%; background: var(--bad); box-shadow: 0 0 0 2px var(--surface); }
+nav.tabbar a.alert-minor::after { background: var(--warn); }
+nav.tools a.alert-major::after, nav.tools a.alert-minor::after { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #d23a26; margin-left: 6px; vertical-align: 2px; }
+nav.tools a.alert-minor::after { background: #b26a00; }
+
+/* Dashboard sections */
+.sections { display: flex; flex-direction: column; gap: 12px; max-width: 760px; width: 100%; margin: 0 auto; }
+.section { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; transition: border-color .2s; }
+.section.open { border-color: var(--steer-cyan); }
+.sec-btn { width: 100%; font: inherit; color: inherit; background: none; border: 0; cursor: pointer; display: grid; grid-template-columns: 56px minmax(0, 1fr) auto 24px; gap: 14px; align-items: center; padding: 16px; text-align: left; }
+.sec-btn .art { width: 56px; height: 56px; border-radius: 12px; background: linear-gradient(140deg, var(--hero-2), var(--hero)); display: grid; place-items: center; }
+.sec-btn .art svg { width: 34px; height: 34px; }
+.sec-txt { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sec-txt b { font-family: var(--font-display); font-size: 20px; line-height: 1.2; }
+.sec-txt span { font-size: 13.5px; color: var(--muted); }
+.sec-count { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.chev { width: 24px; height: 24px; color: var(--accent); transition: transform .2s; }
+.chev svg { width: 24px; height: 24px; }
+.section.open .chev { transform: rotate(180deg); }
+.sec-list { border-top: 1px solid var(--line); }
+.tool-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) 16px; gap: 12px; align-items: center; padding: 12px 16px; text-decoration: none; color: inherit; border-top: 1px solid var(--line); }
+.tool-row:first-child { border-top: 0; }
+.tool-row:hover { background: var(--bg); }
+.tool-row .art.sm { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(140deg, var(--hero-2), var(--hero)); display: grid; place-items: center; }
+.tool-row .art.sm svg { width: 25px; height: 25px; }
+.tr-txt { min-width: 0; display: flex; flex-direction: column; }
+.tr-txt b { font-weight: 600; font-size: 15.5px; }
+.tr-txt span { font-size: 13px; color: var(--muted); }
+.tr-go { font-size: 24px; line-height: 1; color: var(--muted); }
+@media (max-width: 460px) { .sec-btn { grid-template-columns: 48px minmax(0, 1fr) 24px; gap: 12px; padding: 14px; } .sec-btn .art { width: 48px; height: 48px; } .sec-count { display: none; } .sec-txt b { font-size: 18px; } }
+@media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
+
+/* Tenant, headers, Cyber Essentials */
+.cmd-row { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.tid { font-family: var(--font-mono); font-size: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; overflow-wrap: anywhere; word-break: break-all; }
+form.search.hdr { flex-direction: column; align-items: stretch; }
+form.search.hdr textarea { font: inherit; font-family: var(--font-mono); font-size: 12.5px; padding: 12px 14px; border: 0; border-radius: 9px; background: #ffffff; color: #18222d; resize: vertical; min-height: 110px; width: 100%; }
+form.search.hdr textarea:focus-visible { outline: 3px solid var(--steer-cyan); outline-offset: 1px; }
+form.search.hdr button { align-self: flex-start; }
+details.how { margin-top: 12px; color: var(--hero-muted); font-size: 13.5px; max-width: 62ch; }
+details.how summary { cursor: pointer; color: #ffffff; font-weight: 600; }
+details.how ul { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+details.how b { color: #ffffff; font-weight: 600; }
+ol.hops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+ol.hops li { padding: 10px 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+ol.hops li:first-child { border-top: 0; padding-top: 2px; }
+.hop-top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.hop-top b { font-family: var(--font-mono); font-size: 13px; font-weight: 500; overflow-wrap: anywhere; min-width: 0; }
+.hop-d { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+ol.hops small { font-size: 12px; color: var(--muted); font-family: var(--font-mono); overflow-wrap: anywhere; }
+ol.hops .t { height: 6px; border-radius: 999px; background: var(--track); overflow: hidden; }
+ol.hops .t i { display: block; height: 100%; border-radius: inherit; }
+.figures.textfigs .fig b { font-size: 17px; line-height: 1.25; overflow-wrap: anywhere; }
+.ghostbtn { flex: 0 0 auto; font: inherit; font-weight: 600; padding: 14px 18px; border-radius: 9px; border: 1px solid rgba(255,255,255,.35); color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; }
+.iasme-fill { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 12px; background: var(--info-bg); border: 1px solid color-mix(in srgb, var(--info) 30%, transparent); }
+.iasme-fill > b { font-size: 15px; }
+.fill-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; }
+.fill-steps .copybtn { display: inline-block; margin: 0 2px; }
+.iasme-fill textarea { font: inherit; font-family: var(--font-mono); font-size: 12.5px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); width: 100%; resize: vertical; }
+.iasme-fill .btnp { align-self: flex-start; }
+.goodnote { color: var(--good); }
+.ce-sub { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); font-family: var(--font-mono); overflow-wrap: anywhere; }
+
+/* QR check */
+.qr-box { display: flex; flex-direction: column; gap: 10px; }
+.qr-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.qr-actions .ghostbtn { cursor: pointer; }
+form.search.qr-paste { padding: 6px; }
+form.search.qr-paste .field input { padding: 11px 14px; font-size: 14px; }
+form.search.qr-paste button.primary { padding: 11px 18px; background: rgba(255,255,255,.14); color: #ffffff; }
+.qr-stage { position: relative; border-radius: 14px; overflow: hidden; background: #000; aspect-ratio: 3 / 4; max-width: 420px; max-height: 70vh; width: 100%; margin: 4px auto 14px; }
+.qr-stage video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.qr-frame { position: absolute; inset: 18% 14%; border: 3px solid var(--steer-cyan); border-radius: 18px; box-shadow: 0 0 0 999px rgba(0,0,0,.35); }
+.qr-cam-wrap { display: flex; flex-direction: column; align-items: center; }
+.qr-link { display: flex; flex-direction: column; gap: 12px; }
+.qr-dom { font-size: 15px; }
+.qr-dom b { font-family: var(--font-mono); font-size: 16px; overflow-wrap: anywhere; }
+.qr-link code { font-family: var(--font-mono); font-size: 13px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; }
+.qr-link mark { background: color-mix(in srgb, var(--steer-cyan) 30%, transparent); color: var(--ink); border-radius: 3px; padding: 0 1px; font-weight: 600; }
+.copybtn.danger { color: #ffffff; background: var(--bad); border-color: var(--bad); }
+
+footer .inner { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-block: 18px 40px; display: flex; flex-direction: column; gap: 6px; }
+footer a { color: inherit; }
+@media (prefers-reduced-motion: reduce) { .dial .sweep, .spinner { animation-duration: 6s; } .bar-row .t i, .tool-card { transition: none; } }
+
+/* Dragon Defence */
+.brandbar .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.brandbar img.mark { height: 52px; }
+.brandbar img.word { height: 34px; }
+.home-hero-logo { display: flex; justify-content: center; }
+.home-hero-logo img { width: 100%; max-width: 250px; height: auto; filter: drop-shadow(0 18px 30px rgba(0,0,0,.45)); }
+.tool-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.tcard { display: flex; flex-direction: column; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; text-decoration: none; color: var(--ink); border-top: 4px solid var(--steer-cyan); transition: transform .15s, box-shadow .15s; }
+.tcard:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -18px rgba(20,30,40,.45); }
+.tcard .art { width: 56px; height: 56px; border-radius: 12px; background: #1a2633; display: grid; place-items: center; }
+.tcard .art svg { width: 34px; height: 34px; }
+.tcard .q { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.tcard b { font-family: var(--font-display); font-size: 20px; }
+.tcard p { margin: 0; color: var(--muted); font-size: 14px; flex: 1; }
+.tcard .go { font-weight: 600; color: var(--accent); }
+.cta.nolink a { display: none; }
+@media (max-width: 860px) { .tool-cards { grid-template-columns: 1fr; } }
+@media (max-width: 700px) {
+  nav.tabbar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .brandbar img.mark { height: 40px; } .brandbar img.word { height: 26px; }
+  .home-hero-logo img { max-width: 150px; }
+}
+@media (max-width: 380px) { .brandbar img.word { height: 21px; } }
+</style>
+</head>
+<body>
+
+<div class="brandbar gutter">
+  <div class="inner">
+    <a class="logo" href="#home" data-route="home" aria-label="Dragon Defence home"><img class="mark" src="logo-mark.png" alt=""><img class="word" src="logo-wordmark.png" alt="Dragon Defence, Cyber Security Solutions"></a>
+    <span class="apptitle">Security Tools</span>
+    <nav class="tools" aria-label="Security tools">
+      <a href="#home" data-route="home">Home</a>
+      <a href="#breach" data-route="breach">Email breach check</a>
+      <a href="#password" data-route="password">Password check</a>
+      <a href="#qr" data-route="qr">QR code check</a>
+    </nav>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="Tools">
+  <a href="#home" data-route="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l8 3.2v6c0 5-3.4 8.4-8 10.2C7.4 20.4 4 17 4 12V6z"/></svg><span>Home</span></a>
+  <a href="#breach" data-route="breach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M3 6.5l9 6.5 9-6.5"/></svg><span>Email</span></a>
+  <a href="#password" data-route="password"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 018 0v3"/></svg><span>Password</span></a>
+  <a href="#qr" data-route="qr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"/><path d="M14 14h3v3M20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg><span>QR code</span></a>
+</nav>
+
+<section class="hero gutter">
+  <div class="ribbons" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="inner" id="hero"></div>
+</section>
+
+<main class="gutter"><div class="inner" id="out" aria-live="polite"></div></main>
+
+<footer class="gutter"><div class="inner" id="foot"></div></footer>
+
+<script>
+(() => {
+  const BRAND = {
+    name: "Dragon Defence",
+    // Put Dragon Defence's website or a mailto: link here to show a contact button under each result
+    ctaLink: "",
+    ctaLabel: "Talk to Dragon Defence"
+  };
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const $ = (id) => document.getElementById(id);
+  const heroEl = $("hero"), out = $("out"), foot = $("foot");
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const sv = (tag, attrs) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+  const html = (s) => { const t = document.createElement("template"); t.innerHTML = s.trim(); return t.content; };
+  const stripTags = (s) => { const d = document.createElement("div"); d.innerHTML = String(s || ""); return (d.textContent || "").replace(/\s+/g, " ").trim(); };
+  const fmt = (n) => Number(n || 0).toLocaleString("en-GB");
+  const compact = (n) => Intl.NumberFormat("en-GB", { notation: "compact", maximumFractionDigits: 1 }).format(Number(n || 0));
+  const isYes = (v) => String(v).toLowerCase() === "yes";
+  const raf2 = (fn) => requestAnimationFrame(() => requestAnimationFrame(fn));
+
+  // ================= Shared components =================
+  function makeDial() {
+    const wrap = el("div", "dial-wrap"); wrap.setAttribute("aria-hidden", "true");
+    const svg = sv("svg", { class: "dial", viewBox: "0 0 280 280" });
+    const uid = "sw" + Math.random().toString(36).slice(2, 7);
+    svg.innerHTML = `<defs><linearGradient id="${uid}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f29a2e" stop-opacity="0"/><stop offset="1" stop-color="#f29a2e" stop-opacity=".55"/></linearGradient></defs>
+      <circle cx="140" cy="140" r="130" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.18)"/>
+      <circle cx="140" cy="140" r="95" fill="none" stroke="rgba(255,255,255,.12)"/>
+      <circle cx="140" cy="140" r="60" fill="none" stroke="rgba(255,255,255,.12)"/>
+      <line x1="10" y1="140" x2="270" y2="140" stroke="rgba(255,255,255,.08)"/>
+      <line x1="140" y1="10" x2="140" y2="270" stroke="rgba(255,255,255,.08)"/>
+      <g class="sweep"><path d="M140 140 L270 140 A130 130 0 0 0 232 48 Z" fill="url(#${uid})"/></g>
+      <g class="blips"></g>
+      <circle cx="140" cy="140" r="46" fill="#1a2633" stroke="#f29a2e" stroke-width="2"/>
+      <text class="num" x="140" y="149" text-anchor="middle" font-size="30" font-weight="700">–</text>
+      <text class="sub" x="140" y="167" text-anchor="middle">READY</text>`;
+    wrap.append(svg);
+    const set = ({ value = "–", sub = "", colour = "#ffffff", blips = 0, scanning = false } = {}) => {
+      svg.classList.toggle("scanning", scanning);
+      const num = svg.querySelector(".num"); num.textContent = scanning ? "…" : String(value); num.setAttribute("fill", colour);
+      const len = num.textContent.length; num.setAttribute("font-size", len <= 3 ? 30 : len <= 4 ? 24 : 18); num.setAttribute("y", len <= 3 ? 149 : 147);
+      svg.querySelector(".sub").textContent = scanning ? "SCANNING" : sub;
+      const g = svg.querySelector(".blips"); g.replaceChildren();
+      if (!scanning) for (let i = 0; i < Math.min(blips, 14); i++) {
+        const a = (i * 137.5) * Math.PI / 180, r = 62 + (i * 23) % 62;
+        g.append(sv("circle", { cx: 140 + r * Math.cos(a), cy: 140 + r * Math.sin(a), r: 4.5, fill: "#ff8b77", stroke: "#0f1720", "stroke-width": 1.5 }));
+      }
+    };
+    return { node: wrap, set };
+  }
+
+  // mode "risk": high = bad. mode "protect": high = good.
+  function gauge(score, mode, caption) {
+    const s = Math.max(0, Math.min(100, Math.round(score)));
+    let colour, label;
+    if (mode === "risk") { [label, colour] = s === 0 ? ["CLEAR", "var(--good)"] : s < 35 ? ["LOW", "var(--good)"] : s < 60 ? ["MEDIUM", "var(--warn)"] : s < 80 ? ["HIGH", "var(--bad)"] : ["CRITICAL", "var(--bad)"]; }
+    else { [label, colour] = s >= 85 ? ["STRONG", "var(--good)"] : s >= 65 ? ["GOOD", "var(--good)"] : s >= 45 ? ["FAIR", "var(--warn)"] : ["WEAK", "var(--bad)"]; }
+    const svg = sv("svg", { viewBox: "0 0 200 124", class: "gauge", role: "img", "aria-label": `${caption} ${s} out of 100, ${label.toLowerCase()}` });
+    const r = 80, cx = 100, cy = 100, len = Math.PI * r, arc = `M${cx - r} ${cy} A${r} ${r} 0 0 1 ${cx + r} ${cy}`;
+    svg.append(sv("path", { d: arc, fill: "none", stroke: "var(--track)", "stroke-width": 16, "stroke-linecap": "round" }));
+    const fg = sv("path", { d: arc, fill: "none", stroke: colour, "stroke-width": 16, "stroke-linecap": "round", "stroke-dasharray": len, "stroke-dashoffset": len });
+    fg.style.transition = "stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1)"; svg.append(fg);
+    const t = sv("text", { x: cx, y: 92, "text-anchor": "middle", "font-size": 38, "font-weight": 800 }); t.textContent = s; svg.append(t);
+    const l = sv("text", { x: cx, y: 116, "text-anchor": "middle", class: "lbl" }); l.textContent = caption.toUpperCase() + " · " + label; svg.append(l);
+    raf2(() => fg.setAttribute("stroke-dashoffset", String(len * (1 - Math.max(s, 2) / 100))));
+    return svg;
+  }
+
+  let PREFILL = null;   // { route, value } handed from the full report to a tool
+  let current = null;
+  const TITLES = { home: "Security Tools", breach: "Email breach check", password: "Password check", qr: "QR code check" };
+  function takePrefill(route) { if (PREFILL && PREFILL.route === route) { const v = PREFILL.value; PREFILL = null; return v; } return null; }
+
+  // Plain-text summary of whatever result is on screen, for the share sheet
+  function resultText() {
+    const L = [`${BRAND.name} · ${TITLES[current] || "Security Tools"}`];
+    const v = out.querySelector(".verdict"); if (!v) return L.join("\n");
+    if (v.querySelector(".example-flag")) L.push("(Example data)");
+    L.push("", v.querySelector("h2").textContent);
+    const p = v.querySelector(".txt > p"); if (p) L.push(p.textContent);
+    const g = v.querySelector("svg[aria-label]"); if (g) L.push(g.getAttribute("aria-label"));
+    const secs = [...out.querySelectorAll(".sec-row, .share-line")]; if (secs.length) { L.push(""); secs.forEach(r => L.push("• " + r.dataset.text)); }
+    const figs = [...out.querySelectorAll(".fig")]; if (figs.length) { L.push(""); figs.forEach(f => L.push(`• ${f.querySelector("b").textContent} ${f.querySelector("span").textContent}`)); }
+    const cds = [...out.querySelectorAll(".cd")]; if (cds.length) { L.push(""); cds.forEach(c => L.push(`• ${c.querySelector(".cap").textContent}: ${c.querySelector("b").textContent}`)); }
+    const checks = [...out.querySelectorAll(".check")]; if (checks.length) { L.push(""); checks.forEach(c => L.push(`[${c.querySelector(".state").textContent}] ${c.querySelector(".name").textContent}`)); }
+    const ents = [...out.querySelectorAll(".entry")]; if (ents.length) { L.push("", "Breaches:"); ents.forEach(e => L.push(`• ${e.querySelector(".name").textContent} (${e.querySelector(".yr").textContent})`)); }
+    L.push("", "Checked with Dragon Defence Security Tools");
+    if (/^https:/.test(location.href) && !/claude/i.test(location.host)) L.push(location.href.split("#")[0] + "#" + current);
+    if (/^https?:/.test(BRAND.ctaLink)) L.push("Dragon Defence · " + BRAND.ctaLink.replace(/^https?:\/\//, ""));
+    return L.join("\n");
+  }
+  const SHARE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>';
+  function shareButton() {
+    const b = el("button", "sharebtn"); b.type = "button"; b.innerHTML = SHARE_ICON; b.append(document.createTextNode("Share result"));
+    const label = (t) => { b.lastChild.textContent = t; };
+    b.addEventListener("click", async () => {
+      const text = resultText(), title = BRAND.name + " · " + (TITLES[current] || "Security Tools");
+      if (navigator.share) { try { await navigator.share({ title, text }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+      try { await navigator.clipboard.writeText(text); label("Copied to clipboard"); }
+      catch { label("Couldn't share here"); }
+      setTimeout(() => label("Share result"), 2200);
+    });
+    return b;
+  }
+  function verdict(state, tagText, title, body, isExample, side) {
+    const v = el("div", "verdict " + state); const t = el("div", "txt");
+    const tag = el("div", "tag", tagText); if (isExample) tag.append(el("span", "example-flag", "Example data"));
+    t.append(tag, el("h2", null, title)); if (body) t.append(el("p", null, body));
+    if (state !== "err") t.append(shareButton());
+    v.append(t); if (side) v.append(side); return v;
+  }
+  function figures(items) {
+    const figs = el("div", "figures");
+    items.forEach(([b, s, c]) => { const f = el("div", "fig"); const bb = el("b", null, b); if (c) bb.style.setProperty("--fc", c); f.append(bb, el("span", null, s)); figs.append(f); });
+    return figs;
+  }
+  function panel(title, hint) { const p = el("div", "panel"); p.append(el("h3", null, title)); if (hint) p.append(el("p", "hint", hint)); return p; }
+  function stepsPanel(title, hint, steps) {
+    const p = panel(title, hint); const ol = el("ol", "steps");
+    steps.forEach(([h, s]) => { const li = el("li"); const sp = el("span"); sp.append(el("b", null, h + " "), document.createTextNode(s)); li.append(sp); ol.append(li); });
+    p.append(ol); return p;
+  }
+  function cta(text) {
+    const c = el("div", "cta" + (BRAND.ctaLink ? "" : " nolink")); c.append(el("p", null, text));
+    const a = el("a", null, BRAND.ctaLabel + " →"); a.href = BRAND.ctaLink; a.target = "_blank"; a.rel = "noopener"; c.append(a); return c;
+  }
+  const ICONS = {
+    pass: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>',
+    warn: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8 3v6"/><circle cx="8" cy="12.6" r=".6" fill="currentColor"/></svg>',
+    fail: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+    info: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8 7v5"/><circle cx="8" cy="4" r=".6" fill="currentColor"/></svg>'
+  };
+  const STATE_LABEL = { pass: "Pass", warn: "Improve", fail: "Fail", info: "Optional" };
+  function checkList(items) {
+    const ul = el("ul", "checks");
+    items.forEach(c => {
+      const li = el("li", "check " + c.status);
+      const ico = el("span", "ico"); ico.innerHTML = ICONS[c.status]; ico.setAttribute("aria-hidden", "true");
+      const body = el("div", "body"); body.append(el("span", "name", c.name), el("p", "what", c.what));
+      if (c.record) body.append(el("div", "rec", c.record));
+      li.append(ico, body, el("span", "state", c.label || STATE_LABEL[c.status])); ul.append(li);
+    });
+    return ul;
+  }
+  function loading(text) { out.replaceChildren(); const d = el("div", "loading"); d.append(el("span", "spinner"), el("span", null, text)); out.append(d); }
+  function errorBox(title, msg) { out.replaceChildren(verdict("err", "Couldn't check", title, msg)); }
+  const NET_ERR = "Check your connection and try again. If you're viewing this inside a preview that blocks outside requests, open the toolkit from its hosted address instead.";
+
+  // Hero builder
+  function buildHero({ eyebrow, title, lede, form, fine, ctas }) {
+    heroEl.replaceChildren();
+    const left = el("div");
+    left.append(el("p", "eyebrow", eyebrow));
+    const h = el("h1"); h.innerHTML = title; left.append(h);
+    left.append(el("p", "lede", lede));
+    if (form) left.append(form);
+    if (ctas) left.append(ctas);
+    if (fine) { const f = el("p", "fine"); f.append(...fine); left.append(f); }
+    const dial = makeDial();
+    heroEl.append(left, dial.node);
+    return dial;
+  }
+  function searchForm({ id, label, type = "text", placeholder, button, reveal, autocomplete = "off", inputmode }) {
+    const f = el("form", "search"); f.noValidate = true;
+    const lab = el("label", "sr", label); lab.htmlFor = id;
+    const field = el("div", "field" + (reveal ? " has-reveal" : ""));
+    const inp = el("input"); inp.id = id; inp.type = type; inp.placeholder = placeholder; inp.autocomplete = autocomplete; inp.spellcheck = false; inp.setAttribute("autocapitalize", "off");
+    if (inputmode) inp.inputMode = inputmode;
+    field.append(inp);
+    if (reveal) {
+      const b = el("button", "reveal", "Show"); b.type = "button";
+      b.addEventListener("click", () => { const show = inp.type === "password"; inp.type = show ? "text" : "password"; b.textContent = show ? "Hide" : "Show"; });
+      field.append(b);
+    }
+    const btn = el("button", "primary", button); btn.type = "submit";
+    f.append(lab, field, btn);
+    return { form: f, input: inp, button: btn };
+  }
+  function exLink(text, onClick) { const b = el("button", "linkish", text); b.type = "button"; b.addEventListener("click", onClick); return b; }
+  function extA(text, href) { const a = el("a", null, text); a.href = href; a.target = "_blank"; a.rel = "noopener"; return a; }
+
+  // DNS over HTTPS (Google, then Cloudflare)
+  async function dns(name, type) {
+    const tries = [
+      () => fetch(`https://dns.google/resolve?name=${encodeURIComponent(name)}&type=${type}`),
+      () => fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=${type}`, { headers: { accept: "application/dns-json" } })
+    ];
+    let lastErr;
+    for (const t of tries) {
+      try { const r = await t(); if (!r.ok) throw new Error("dns " + r.status); return await r.json(); } catch (e) { lastErr = e; }
+    }
+    throw lastErr;
+  }
+  const TYPE_NUM = { A: 1, CNAME: 5, MX: 15, TXT: 16, AAAA: 28, CAA: 257 };
+  const answers = (res, type) => (res && Array.isArray(res.Answer) ? res.Answer : []).filter(a => a.type === TYPE_NUM[type]).map(a => type === "TXT" ? String(a.data).replace(/^"|"$/g, "").replace(/"\s*"/g, "") : String(a.data));
+  const cleanHost = (s) => String(s || "").trim().toLowerCase().replace(/^[a-z]+:\/\//, "").replace(/^.*@/, "").split(/[\/?#:]/)[0].replace(/\.$/, "");
+  const validHost = (h) => /^(?=.{3,253}$)([a-z0-9-]{1,63}\.)+[a-z]{2,63}$/.test(h);
+
+  // ================= Tool: Breach check =================
+  const Breach = (() => {
+    const API = "https://api.xposedornot.com/v1/breach-analytics?email=";
+    const SENSITIVE = /password|credit|card|bank|security question|social security|passport|dates? of birth|phone|physical address|financial|ssn|pin/i;
+    const PW_RISK = { plaintext: ["Plain-text passwords", "bad", 3], easytocrack: ["Weak password hashes", "bad", 2.5], hardtocrack: ["Strong password hashes", "warn", 1], unknown: ["Password storage unknown", "", 1] };
+    const AV = ["#3d5a73", "#f29a2e", "#5a7690", "#1a2633", "#7d8fa0", "#2e4258"];
+    const SAMPLE = { email: "jo.bloggs@example.com", pastes: 1, breaches: [
+      { breach: "LinkedIn", domain: "linkedin.com", industry: "Information Technology", xposed_date: "2012", xposed_records: 164611595, password_risk: "easytocrack", verified: "Yes", xposed_data: "Email addresses;Passwords", details: "Professional networking site breach exposing email addresses and SHA1 password hashes." },
+      { breach: "Dropbox", domain: "dropbox.com", industry: "Information Technology", xposed_date: "2012", xposed_records: 68648009, password_risk: "hardtocrack", verified: "Yes", xposed_data: "Email addresses;Passwords", details: "Cloud storage breach exposing email addresses and password hashes." },
+      { breach: "MyFitnessPal", domain: "myfitnesspal.com", industry: "Health", xposed_date: "2018", xposed_records: 143606147, password_risk: "hardtocrack", verified: "Yes", xposed_data: "Email addresses;IP addresses;Passwords;Usernames", details: "Fitness app breach exposing usernames, IP addresses and password hashes." },
+      { breach: "Canva", domain: "canva.com", industry: "Information Technology", xposed_date: "2019", xposed_records: 137272116, password_risk: "hardtocrack", verified: "Yes", xposed_data: "Email addresses;Geographic locations;Names;Passwords;Usernames", details: "Online design tool breach exposing names, usernames, locations and bcrypt password hashes." },
+      { breach: "Collection #1", domain: "", industry: "Miscellaneous", xposed_date: "2019", xposed_records: 772904991, password_risk: "plaintext", verified: "No", xposed_data: "Email addresses;Passwords", details: "Credential-stuffing list compiled from earlier breaches and traded on hacking forums." },
+      { breach: "Twitter (200M)", domain: "twitter.com", industry: "Social Media", xposed_date: "2021", xposed_records: 211524284, password_risk: "unknown", verified: "Yes", xposed_data: "Email addresses;Names;Social media profiles;Usernames", details: "Scraped profile data linking email addresses to accounts, later sold and then leaked." }
+    ]};
+    let dial;
+
+    function riskScore(list, pastes) {
+      if (!list.length && !pastes) return 0;
+      let s = Math.min(40, list.length * 7) + Math.min(10, pastes * 5);
+      list.forEach(b => { s += (PW_RISK[b.password_risk] || PW_RISK.unknown)[2] * 3; });
+      const types = new Set(); list.forEach(b => String(b.xposed_data || "").split(";").forEach(t => t.trim() && types.add(t.trim())));
+      types.forEach(t => { if (SENSITIVE.test(t)) s += 4; });
+      const latest = Math.max(0, ...list.map(b => parseInt(b.xposed_date, 10) || 0));
+      if (latest && new Date().getFullYear() - latest <= 3) s += 8;
+      return Math.max(8, Math.min(100, Math.round(s)));
+    }
+    function timeline(list) {
+      const years = list.map(b => parseInt(b.xposed_date, 10)).filter(Boolean);
+      const now = new Date().getFullYear(), start = Math.min(...years, now - 9), span = now - start + 1;
+      const counts = {}; years.forEach(y => counts[y] = (counts[y] || 0) + 1);
+      const max = Math.max(1, ...Object.values(counts));
+      const W = 420, H = 150, padL = 22, padB = 22, padT = 10, iw = W - padL - 6, ih = H - padB - padT, bw = iw / span;
+      const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Breaches per year" });
+      for (let i = 0; i <= max; i++) {
+        const y = padT + ih - ih * i / max;
+        svg.append(sv("line", { x1: padL, x2: W - 6, y1: y, y2: y, stroke: "var(--line)", "stroke-dasharray": i ? "2 3" : "" }));
+        const t = sv("text", { x: padL - 6, y: y + 3, "text-anchor": "end" }); t.textContent = i; svg.append(t);
+      }
+      for (let k = 0; k < span; k++) {
+        const yr = start + k, c = counts[yr] || 0, x = padL + k * bw;
+        if (c) { const h = ih * c / max; svg.append(sv("rect", { x: x + bw * .18, y: padT + ih - h, width: bw * .64, height: h, rx: 3, fill: yr >= now - 3 ? "var(--bad)" : "var(--steer-cyan)" })); }
+        if (span <= 12 || k % 2 === 0 || yr === now) { const t = sv("text", { x: x + bw / 2, y: H - 6, "text-anchor": "middle" }); t.textContent = "'" + String(yr).slice(2); svg.append(t); }
+      }
+      return svg;
+    }
+    function render(email, data, isExample) {
+      out.replaceChildren();
+      const list = (data.breaches || []).slice().sort((a, b) => String(b.xposed_date).localeCompare(String(a.xposed_date)));
+      const n = list.length, exposed = !!(n || data.pastes);
+      dial.set({ value: n, sub: n === 1 ? "BREACH" : "BREACHES", colour: n ? "#ff8b77" : "#6fd59c", blips: n });
+      out.append(verdict(exposed ? "bad" : "good", exposed ? "Exposed" : "No breaches found",
+        exposed ? (n ? `${email} appears in ${n} known breach${n === 1 ? "" : "es"}` : `${email} appears in leaked data dumps`) : `Good news: ${email} isn't in any known breach`,
+        exposed ? "Details from these incidents have been circulated, traded or published. Treat any password used on these sites as compromised." : "It doesn't appear in any breach or public data dump indexed so far. Keep passwords unique and MFA switched on.",
+        isExample, gauge(riskScore(list, data.pastes), "risk", "Risk")));
+      if (n) {
+        const years = list.map(b => parseInt(b.xposed_date, 10)).filter(Boolean);
+        const pwBad = list.filter(b => b.password_risk === "plaintext" || b.password_risk === "easytocrack").length;
+        out.append(figures([[fmt(n), "breaches found", "var(--bad)"], [years.length ? String(Math.min(...years)) : "—", "first exposed"], [String(pwBad), "with weak or plain-text passwords", pwBad ? "var(--bad)" : ""], [compact(list.reduce((s, b) => s + (Number(b.xposed_records) || 0), 0)), "people caught up in these breaches"]]));
+        const g2 = el("div", "grid2");
+        const p1 = panel("Breaches by year", "Red bars are breaches from the last three years."); p1.classList.add("chart"); p1.append(timeline(list));
+        const p2 = panel("What was exposed", "How many breaches leaked each type of data. Red marks sensitive data.");
+        const counts = {}; list.forEach(b => String(b.xposed_data || "").split(";").map(x => x.trim()).filter(Boolean).forEach(x => counts[x] = (counts[x] || 0) + 1));
+        const bars = el("div", "bars"), fills = [];
+        Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 7).forEach(([k, c]) => {
+          const row = el("div", "bar-row" + (SENSITIVE.test(k) ? " hot" : "")); const kk = el("div", "k"); kk.append(el("b", null, k), el("em", null, c + " of " + n));
+          const tr = el("div", "t"), fi = el("i"); tr.append(fi); row.append(kk, tr); bars.append(row); fills.push([fi, c / n * 100]);
+        });
+        p2.append(bars); g2.append(p1, p2); out.append(g2);
+        raf2(() => fills.forEach(([fi, w]) => fi.style.width = w + "%"));
+        const p3 = panel("Breach history", "Newest first."); const ul = el("ul", "ledger");
+        list.forEach(b => {
+          const li = el("li", "entry"), name = b.breach || "Unnamed breach";
+          const av = el("div", "avatar", name.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase() || "?");
+          av.style.background = AV[[...name].reduce((s, ch) => s + ch.charCodeAt(0), 0) % AV.length]; av.setAttribute("aria-hidden", "true");
+          const body = el("div", "body"), top = el("div", "top"); top.append(el("span", "name", name)); if (b.domain) top.append(el("span", "dom", b.domain)); body.append(top);
+          const desc = stripTags(b.details); if (desc) body.append(el("p", "desc", desc.length > 240 ? desc.slice(0, 237) + "…" : desc));
+          const meta = el("div", "meta"), pr = PW_RISK[b.password_risk] || PW_RISK.unknown;
+          meta.append(el("span", "pill " + pr[1], pr[0]));
+          if (b.xposed_records) meta.append(el("span", "pill", fmt(b.xposed_records) + " accounts"));
+          if (b.industry) meta.append(el("span", "pill", b.industry));
+          meta.append(el("span", "pill " + (isYes(b.verified) ? "good" : ""), isYes(b.verified) ? "Verified" : "Unverified"));
+          body.append(meta); li.append(av, body, el("div", "yr", b.xposed_date || "—")); ul.append(li);
+        });
+        p3.append(ul); out.append(p3);
+      }
+      if (data.pastes) out.append(panel("Public data dumps", `Also found in ${data.pastes} paste${data.pastes === 1 ? "" : "s"}: text dumps posted to sites such as Pastebin, often lists of stolen logins.`));
+      out.append(stepsPanel(exposed ? "What to do now" : "Stay protected", exposed ? "Work through these in order." : "Good habits keep it that way.", exposed ? [
+        ["Change passwords", "on every site listed, and anywhere else you reused the same one."],
+        ["Turn on MFA", "for email, banking and Microsoft 365 or Google accounts first."],
+        ["Use a password manager", "so every site gets its own long, random password."],
+        ["Expect phishing", "breached addresses get convincing emails quoting real leaked details."]
+      ] : [["Unique passwords", "for every account, ideally from a password manager."], ["Turn on MFA", "wherever it's offered, starting with email."], ["Check regularly", "or set up domain-wide breach monitoring for your business."]]));
+      out.append(cta("Worried about what this means for your business? Dragon Defence can check every address on your domain and set up ongoing breach alerts."));
+    }
+    let busy = false;
+    async function run(email, btn) {
+      if (busy) return; busy = true; btn.disabled = true;
+      loading("Searching breach records for " + email + "…"); dial.set({ scanning: true });
+      try {
+        const res = await fetch(API + encodeURIComponent(email), { headers: { Accept: "application/json" } });
+        if (res.status === 404) return render(email, { breaches: [], pastes: 0 }, false);
+        if (res.status === 429) { dial.set(); return errorBox("Too many checks at once", "The breach database limits how often it can be queried. Wait a few seconds and try again."); }
+        if (!res.ok) { dial.set(); return errorBox("The breach database didn't respond", `It returned an error (${res.status}). Try again in a minute.`); }
+        const json = await res.json();
+        const details = json && json.ExposedBreaches && Array.isArray(json.ExposedBreaches.breaches_details) ? json.ExposedBreaches.breaches_details : [];
+        render(email, { breaches: details, pastes: (json && json.PastesSummary && Number(json.PastesSummary.cnt)) || 0 }, false);
+      } catch (e) { dial.set(); errorBox("Couldn't reach the breach database", NET_ERR); }
+      finally { busy = false; btn.disabled = false; }
+    }
+    function mount() {
+      const f = searchForm({ id: "breach-email", label: "Email address", type: "email", placeholder: "name@company.co.uk", button: "Check now", autocomplete: "email", inputmode: "email" });
+      dial = buildHero({ eyebrow: "Breach check", title: 'Has your email been <span class="hl">leaked</span> or sold?', lede: "Search billions of breached records in seconds. See which sites lost your details, what was exposed, and exactly what to do next.", form: f.form,
+        fine: [document.createTextNode("Checked against the "), extA("XposedOrNot", "https://xposedornot.com"), document.createTextNode(" breach database. We don't store the address. "), exLink("See an example result", () => { f.input.value = SAMPLE.email; render(SAMPLE.email, SAMPLE, true); })] });
+      f.form.addEventListener("submit", (e) => { e.preventDefault(); const v = f.input.value.trim().toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) { errorBox("That doesn't look like an email address", "Enter a full address, like name@company.co.uk."); f.input.focus(); return; }
+        run(v, f.button); });
+      render(SAMPLE.email, SAMPLE, true);
+      foot.replaceChildren(el("div", null, "Breach data from XposedOrNot, an open breach-tracking service. A clean result means the address isn't in any breach they've indexed, not that it has never been exposed. Dark-web marketplace listings aren't fully covered by any public database."));
+    }
+    return { mount };
+  })();
+
+  // ================= Tool: Password check =================
+  const Password = (() => {
+    const COMMON = ["123456","password","123456789","12345678","12345","qwerty","qwerty123","1q2w3e4r","111111","123123","abc123","password1","password123","admin","letmein","welcome","welcome1","iloveyou","monkey","dragon","football","baseball","sunshine","princess","shadow","master","superman","trustno1","000000","654321","michael","charlie","freedom","whatever","qazwsx","starwars","liverpool","chelsea","arsenal","cardiff","wales","london","summer","winter","spring","autumn","hello","hello123","changeme","passw0rd","p@ssw0rd","p@ssword","secret","login","access","flower","cheese","computer","internet","ashley","jordan","maggie","hunter","buster","soccer","killer","pepper","daniel","thomas","jessica","matthew","andrew","joshua"];
+    const WORDS = ["password","passw0rd","welcome","admin","letmein","qwerty","summer","winter","spring","autumn","monday","friday","january","december","dragon","monkey","football","iloveyou","cardiff","wales","london","company","office","secret","login"];
+    const SEQS = ["abcdefghijklmnopqrstuvwxyz", "0123456789", "qwertyuiop", "asdfghjkl", "zxcvbnm"];
+    let dial, pwInput = null, pwForm = null;
+    const WORDLIST = "abacus abdomen abide abiding ability ablaze able abreast abridge abroad absence absolve abstain absurd accent acclaim account acetone aching acid acorn acquire acre acrobat acronym acting action active actress acts acutely aerosol afar affair affirm affix afford affront aflame afloat afoot afraid aged ageless agency agenda agent aghast agile agility aging agonize agony agreed aground ahead ahoy aide aids ajar alarm album alfalfa algebra alias alibi aliens alike alive almanac almost aloe aloft aloha alone aloof alright alto alumni always amaze amber ambush amends amenity amiable amid amigo amino amiss ammonia amnesty among amount ample amplify amply amuck amulet amused amuser amusing anagram anatomy anchor anchovy ancient android anemia anemic anew angelic anger angled angler angles angling angrily angular animal animate anime ankle annex annuity another antacid anthem anthill antics antler antonym antsy anvil anybody anyhow anymore anyone anytime anyway aorta apache apostle appear appease applaud apple applied apply approve apricot april apron aptly aqua area arena argue arise armband armed armful armhole arming armless armoire armored armory armrest army aroma arose around arousal arrange array arrest arrival arrive arson ascend ascent ashamed ashen ashes ashy aside askew asleep aspect aspire aspirin astound astride astute atlas atom atop atrium atrophy attach attain attempt attest attic attire auction audible audibly audio august author autism avatar avenge avenue average avert aviator avid avoid await awaken award aware awhile awkward awning awoke awry axis babble babied baboon backed backer backing backlit backlog backup bacon badass badge badland badly badness baffle bagel bagful baggage bagged baggie bagging baggy bagpipe baked bakery baking balance balcony balmy bamboo banana banish banjo banked banker banking banner banshee banter barbed barbell barber barcode barge barista barley barmaid barman barn barrack barrel barrier bash basics basil basin basis basket batboy batch bath baton bats battery batting battle bauble bazooka blabber bladder blade blah blame blaming blank blast blazer blazing bleach bleak bleep blemish blend bless blimp bling blinked blinker blinks blip blitz bloated blob blog blooper blot blouse blubber bluff bluish blunt blurb blurred blurry blurt blush boaster boat bobbed bobbing bobble bobcat bobsled bobtail body bogged boggle bogus boil bolster bolt bonanza bonded bonding boned boney bonfire bonnet bonsai bonus bony book booted booth bootie booting bootleg boots boozy borax boring borough boss botany botch both bottle bottom bounce bouncy bovine boxcar boxer boxing boxlike boxy breach breath breeder breeze breezy brewery brewing briar bribe brick bride bridged brigade bright brim bring brink brisket briskly bristle brittle broaden broadly broiler broken broker bronco bronze brook broom brought browse brunch brunt brush brute bubble bubbly bucked bucket buckle budding buddy budget buffalo buffed buffer buffing buffoon buggy bulb bulge bulgur bulk bulldog bullion bullish bullpen bully bunch bundle bungee bunion bunkbed bunny bunt busboy bush busily busload bust buzz cabana cabbage cabbie cable caboose cache cackle cacti cactus caddie caddy cadet cadmium cage cahoots cake calcium caliber calm caloric calorie calzone cameo camera camper camping campus canal canary cancel candied candle candy cane canine canned canning cannon cannot canola canon canopy canteen canyon capable capably cape capital capitol capped capsize capsule caption captive capture caramel carat caravan carbon carded cardiac caress cargo caring carless carload carnage carol carpool carport carried carrot carry cartel carton cartoon carve carving carwash cascade case cash casing casino casket catalog catcall catcher catchy caterer catfish catlike catnap catnip catsup cattail cattle catty catwalk caucus causal cause causing caution cavalry caviar cavity cedar celery celtic cement census certify chafe chain chair chalice chamber chance change channel chant chaos chapped chaps chapter charger chariot charity charm charred charter chase chasing chaste chatter chatty cheddar cheek cheer cheese cheesy chef chemist chemo cherub chess chest chevron chevy chewer chewing chewy chief chili chill chimp chip chirpy chive choice choking chomp chooser choosy chop chosen chowder chrome chubby chuck chug chummy chump chunk churn chute cider cinch cinema circle circus citable citadel citizen citric citrus city civic civil clad claim clammy clamor clamp clang clapped clapper clarify clarity clash clasp class clatter clause claw clay clean clear cleat cleaver cleft clench clerk clever clicker client climate cling clinic clip clique cloak clobber clock clone cloning closure clothes cloud clover clubbed clump clumsy clunky clutch clutter coach coastal coaster coat cobalt cobbler cobweb cocoa coconut coerce coexist coffee coil coke cola cold collage collar collide collie colony colt coma come comfort comfy comic coming comma commend comment commode common commute company compare compel compile comply compost comrade concave conceal concept concert conch concise concur condone conduit cone confess confirm conform conical conjure consent console consult contact contend contest context contort contour control convene convent cope copied copier copilot coping copious copper copy coral cork corncob cornea corned corner corny coroner corral correct corrode corsage corset cortex cosmic cosmos cost cottage cotton couch cough could country county courier cover coveted coyness cozily cozy cradle crafter crafty cramp crane cranial cranium crank crate crave craving crayon crazed crazily crazy creamed creamer crease create credit creed creme creole crepe crept crested crevice crewman crib cricket cried crier crimp crimson cringe crinkle crinkly crisped crisply crispy critter croak crock crook croon crop cross crouch crouton crowbar crowd crown crucial crudely cruelly cruelty crumb crummy crumpet crunchy crushed crusher crust crux crying cryptic crystal cube cubical cubicle cuddle cuddly culprit culture cupcake cupid cupped cupping curable curator curdle cure curfew curing curled curler curling curly curry curse cursive cursor curtain curtly curtsy curve curvy cushy cusp cussed custard custody customs cycle cyclic cycling cyclist cymbal dagger daily dainty dairy daisy dance dancing dander dandy danger dangle dares darkish darling darn dart dash data dating dawdler dawn daybed daycare daylong dayroom daytime dazzler deacon dealer dealing dealt dean debate debit debrief debtor debug debunk decade decaf decal decay deceit decency decent decibel decimal deck decline decode decoy decree deduce deduct deed deem deepen deeply deface defame default defeat defense defiant defile define deflate defog defraud defrost deftly defuse defy degree deity delay delete delouse delta deluge deluxe demise demote denial denim denote dense density dental dentist denture deny depict deplete deploy deport depose depress deprive depth deputy derail derby derived deserve desktop despair despise despite destiny detail detest detract deuce devalue deviant deviate device devious devotee diagram dial diaper diary dice dicing dictate dill dilute dime dimly dimmed dimmer dimness dimple diner dingbat dinghy dingo dingy dining dinner diocese dioxide diploma dipped dipper dipping disarm disband discard discern discuss disdain dish disjoin disk dislike dismay dismiss disobey disown display dispose dispute disrupt distant distill distort ditch ditto ditzy divided diving dizzy doable docile dock dodge dodgy doily doing dole dollar dollop dolly dolphin domain donated donator donor donut doodle doorman doormat doorway doozy dork dorsal dosage dose dotted douche dove down dowry doze drab drained drainer drank drapery drastic draw dreaded dreamt dreamy dreary drench dress drew dribble dried drier drift driller drippy driven driver driving drizzle drizzly drone drool droop dropbox droplet dropout dropper drove drown drudge drum dubbed duchess ducking ducky duct dude duffel dugout duke duller duly dumping dupe duplex durable durably duress during dusk dust dutiful duty duvet dwarf dweeb dwelled dweller dwindle dynamic dynasty each eagle earache eardrum earflap earful earlobe early earmark earmuff earring earshot earthen earthly earthy earwig easeful easel easiest easily easing easter eatable eaten eatery eating eats ebay ebony ebook ecard echo eclair eclipse ecology economy edge edging edgy edition editor effects effort egging eggnog egotism either eject elastic elated elbow elderly eldest elevate eleven elite elitism elixir ellipse elope elude elusive elves email embargo embark embassy ember emblaze emblem embody emboss emcee emerald emit emote emotion empathy emperor empower emptier empty enable enamel enclose encode encore encrust encrypt ended ending endless endnote endorse energy engaged engine engorge engross engulf enhance enjoyer enrage enrich enroll enslave ensnare ensure entail entire entitle entity entomb entrap entree entrust entwine envious envoy envy enzyme epic episode equal equate equator equinox equity erased eraser erasure errand errant erratic error erupt eskimo esquire essay essence estate etching eternal ethanol ether ethics evacuee evade evasion evasive even evict evident evil evoke evolve exact exalted example excess exclaim exclude excuse exert exes exhale exhaust exhume exile exit exodus expand expanse expel expend expert expire explain explode exploit explore expose express extent extinct extras extrude fable fabric faceted facial facing faction factoid factor factual faculty fade fading failing falcon fall false falsify fame family famine fanatic fancied fancy fanfare fang fanning fantasy fascism faster fasting faucet favored feast federal fedora feeble feed feel feisty feline femur fence fencing fender ferment ferret ferris ferry fervor fester festive fetal fetch fever fiber fiction fiddle fidgety fifteen fifth fifty figment figure filing filled filler filling film filter filth finale finally finance finch finer finicky finite finless finlike five flaccid flagman flail flakily flaky flame flanked flap flaring flashy flask flatbed flatly flatten flattop fled fleshed fleshy flick flier flight flinch fling flint flip flirt float flock flop floral florist floss flyable flyaway flyer flying flyover foam foil folic folk follow fondly fondue font food fool footage footer footing footman footpad footsie fossil foster founder foyer fragile frail frame framing frantic frayed fraying frays freebee freebie freedom freeing freely freeway freight french frenzy fresh fretful fretted friday fridge fried friend frill fringe frisbee frisk fritter frolic from front frosted frosty froth frown frozen fruit frying gaffe gaining gains gala gallery galley gallon gallows galore game gaming gamma gander gangly gangway garage garbage garden gargle garland garlic garment garnet garnish garter gating gauging gauze gave gawk gazing gear gecko geek geiger gender generic genre gentile gently gents geology gerbil gestate gesture getaway getting getup giant giblet giddily giddy gift giggle giggly gigolo gilled gills gimmick girdle given giver giving gizmo gizzard glacial glacier glade gladly glamour glance glare glaring glass glazing gleeful glider gliding glimmer glimpse glisten glitch glitter glitzy gloater gloomy glorify glory gloss glove glowing glucose glue gluten glutton gnarly gnat goal goes goggles going golf goliath gonad gondola gone gong good gooey goofy google goon gopher gore gorged gory gosling gossip gothic gotten gout gown grab graded grader grading grafted grain grandly grandma grandpa granite granny granola grant grape graph grapple grasp grass gratify grating gravel graves gravity gravy gray grazing greedy green greeter grew grid grief grill grimace grime grimy grinch grip gristle grit groggy groin groom groove groovy grope ground grouped grout grove grower growing growl grub grudge gruffly grumble grumbly grunge grunt guide guiding guise gulf gully gulp gumball gumdrop gumming gummy gurgle guru gush gusto gusty gutless guts gutter guzzler habitat hacked hacker hacking hacksaw haggler haiku half halogen halt halved halves hamlet hammock hamper hamster handbag handed handful handgun handled handler handoff handsaw handset hangout hangup hankie hanky happier happily happy harbor hardhat hardly hardy harmful harmony harness harpist harsh harvest hash hassle haste hastily hasty hatbox hatchet hate hatless hatred haunt haven hazard hazily hazing hazy headed header heading headset headway heap heat heave heavily heaving hedge hedging hefty helium helmet helper helpful helping hemlock hence henna herald herbal herbs hermit heroics heroism herring herself hertz hexagon hubcap huddle huff hula hulk hull human humble humbly humid humming hummus humped humvee hunger hungry hunk hunter hunting hurdle hurled hurler hurling hurray hurried hurry hurt husband hush husked hybrid hydrant hyphen iciness icing icky icon ideally idiocy idiom idly igloo ignore iguana image imaging imitate immerse impale impart impeach impish implant implode imply impose impound imprint improve impulse impure iodine iodize ipad iphone ipod irate iron islamic isotope issue issuing italics item itunes ivory jackal jacket jackpot jailer janitor january jargon jarring jasmine jaunt java jawed jawless jawline jaws jaybird jazz jeep jellied jelly jersey jester jiffy jigsaw jimmy jingle jinx jitters jittery jockey jogger jogging john joining jolly jolt jovial joyous joyride judge judo juggle jugular juice juicy jujitsu jukebox july jumble jumbo jump june junior juniper junkie junkman jurist juror jury justice justify justly kabob karaoke karate karma kebab keenly keep kelp kennel kept kettle kick kiln kilt kimono kindle kindly kindred kinetic kinfolk king kinship kinsman kisser kissing kitchen kite kitten kitty kiwi kleenex knee knelt knoll koala kooky kosher krypton kudos kung labored laborer ladder ladies ladle ladybug lagged lagging lagoon lair lake lance landed landing lanky lantern lapdog lapel lapped lapping laptop lard large lark lash lasso last latch late lather latrine latter launch launder laundry laurel lavish lazily lazy left legacy legal legend legged legible legibly lego legroom legume legwork lemon lend length lens lent leotard lesser letdown letter lettuce level levers liable liberty library licking life lifter lifting liftoff likely liking lilac lilly lily limb limeade limes limit limping line lingo lining linked linseed lint lion liquefy liqueur liquid lisp list litmus litter little livable lived lively liver lividly living lizard lucid luckily lugged lullaby lumber lumping lumpish lunacy lunar lung lurch lure lurk lushly luster lustily lusty luxury lying lyrics macaw mace machine magenta maggot magical magma magnify maimed majesty maker making malt mama mammal mammary manager manatee mandate manger mangle mango mangy manhole manhood manhunt manila mankind manlike manly manmade manned mannish manor mantis mantra manual many marbled marbles march mardi margin marina marine marital marlin maroon married marrow marry marshy marxism mascot mashed mashing masses massive mastiff matador matcher math mating matrix matron matted matter mauve maximum maybe mayday moaner moaning mobile mobster mocha mocker mockup modify modular module moisten molar mold mollusk monday mongrel monitor monsoon monthly moocher moody mooing mooned moonlit morale morally morse mortify mosaic mossy most motion motive motor motto mounted mourner mouse mousy mouth movable move movie moving mower mowing much muck mulch mule mulled mullets mumble mumbo mummify mummy mumps mundane muppet mural murky museum mushily mushy music musket musky mustang mustard muster musty mutable mutate mute mutiny mutt mutual muzzle myself myspace mystify myth nacho nail name naming nanny nape napkin napped napping nappy narrow nastily native natural nature navy nearby nearest nearly neatly nebula nectar negate nemeses nemesis neon nephew nerd nervous nervy nest neuron neuter neutron never next nibble niece nifty nimble nimbly ninja ninth nuclear nuclei nucleus nugget nullify number numbing numbly numeral numeric nursery nursing nurture nutcase nutlike nutmeg nutty nuzzle nylon oasis object obliged oblong oboe obscure obtain obtuse obvious occupy ocean ocelot octagon octane october octopus ogle oink okay olive omega omen ominous omit onboard ongoing onion online only onset onshore onstage onto onward onyx oops ooze oozy opacity opal open operate opium opossum oppose osmosis other otter ouch ought ounce outage outback outbid outcast outcome outer outfit outgrow outing outlast outlet outline outlook outmost outpost outpour output outrage outrank outsell outward outwit oval ovary oven overact overall overbid overdue overfed overlap overlay overpay overrun overtly overuse oxford oxidant oxidize oxygen oyster ozone paced pacific pacify padded padding paddle padlock pagan pager paging pajamas palace palm paltry pampers panama pancake panda pang panic panning panther pantry pants papaya paper paprika papyrus parade paradox parcel parched pardon parish parka parking parkway parlor parole parrot parsley parsnip partake parted parting partly partner party passage passing passion passive pasta pasted pastel pastime pastor pasture pasty patchy path patient patio patriot patrol pauper paver paving pawing payable payback payday payee payer paying payment payroll pebble pebbly pecan pectin pelican pellet pelt pelvis penalty pencil pendant pending pennant penny penpal pension percent perch perfume perish perjury perky perm pesky peso pester petal petite petri petted petty petunia phantom phobia phoenix phoney phonics phony photo phrase placard placate plank planner plant plasma plaster plastic plated plating platter player playful playing playoff playpen playset plaza pleat pledge plenty pliable plod plop plot plow ploy pluck plug plunder plural plus plywood poach poem poet pogo pointed pointer pointy poise poison poker poking polar police policy polio polish polka polo polygon polymer poncho pond pony popcorn pope poplar popper poppy popular pork porous portal portion portly poser posh posing possum postage postal postbox posted poster posting posture postwar pouch pounce pound pouring pout powdery power powwow prance pranker prayer praying preachy precise precook precut predict preface prefix pregame prelaw prelude premium prepaid prepay preplan preppy preset preshow presoak press presume preteen pretext pretty pretzel prevail prevent preview prewar pried primal primary primate primer primp print prior prism prison prissy privacy private prize probe probing problem process prodigy produce product profane profile progeny program prone prong pronto proofs propose props prorate proton proud proved proven proving provoke prowess prowler proxy prozac prude prune pruning psychic public pucker pueblo pull pulp pulsate pulse puma pumice pummel punch pungent punk pupil puppet puppy purely purge purging purify purist puritan purity purple purr purse pursuit pusher pushing pushpin pushup pushy putdown putt puzzle pyramid python quack quail quake quaking qualify quality qualm quantum quarrel quarry quartet quench query quicken quickly quiet quill quilt quintet quirk quit quiver quote rabid race racing racism rack racoon radar radial radio radish raffle raft rage ragged raging ragweed raider railcar railing railway raisin rake raking rally ramble ramp ramrod ranch random ranged ranger ranging ranked ranking ransack ranting rants rare rarity rascal rash rasping ravage raven ravine raving ravioli reach reactor ream reapply reason reawake rebate rebel rebirth reboot reborn rebound rebuff rebuild rebuilt recall recant recast recede recent recess recital recite reclaim recluse recoil recolor recopy record recount recoup rectal rectify reenact reenter reentry referee refill refined reflex reflux refocus refold refract refrain refresh refried refund refusal refuse refute regain regalia regally reggae regime region regress regroup regular rehab reheat rehire reissue rejoice rejoin relapse related relax relay relearn release reliant relic relieve relight relish relive reload relock rely remake remark remarry rematch remedy remix remnant remold remorse remote removal removed remover rename renewal renewed rental rented renter reoccur reopen reorder repaint repair repave repeal repent replace replay replica reply repose repost reprint reprise reps reptile request require reroute rerun resale rescuer reseal resend resent reset reshape reshoot residue resize resort respect result resume retail retake rethink retinal retired retiree retold retool retouch retrace retract retrain retread retreat retrial retry return retying retype reunion reunite reuse reveal reveler revenge revenue reverb revered reverse revert revise revisit revival reviver revoke revolt reward rewash rewind rewire reword rework rewrap rewrite rhyme ribbon ribcage rice riches richly rickety ricotta ridden ride riding rifling rift rigging rigid rigor rimless rimmed rind rink rinse rinsing riot ripcord ripping ripple riptide rise rising risk risotto ritalin ritzy rival riveter roamer roaming roast robbing robe robin robust rocker rocket rocking rocky rogue roman romp rope roping roster rosy rotten rotting rotunda roundup routine routing rover roving royal rubbed rubber rubbing rubble rubdown ruby ruckus rudder ruined rule rumble rummage rumor rundown runner running runny runt runway rupture rural ruse rush rust sabbath sacred sadden saddled sadly sadness safari safely saffron saga sage sagging saggy said saint sake salad salami salary saline salon saloon salsa salt salute salvage same sample sandal sandbag sandbar sandbox sanded sanding sandlot sandpit sandy sank santa sapling sappy sarcasm sardine sash sassy satchel satin satisfy saucy sauna savage savanna saved savings savior savor scabbed scabby scalded scale scaling scallop scam scandal scanner scant scarce scared scarf scarily scary scenic scheme scholar science scion scoff scone scoop scooter scope scorch scored scorer scoring scorn scotch scoured scouts scrap scratch scrawny screen scribe script scroll scrooge scruffy scrunch scuba scuff scurvy scuttle second secrecy secret sector secular sedan sedate seduce segment seismic seizing seldom self seltzer seminar senate senator send senior sepia septic septum sequel series sermon serpent serve service serving sesame setback setting settle setup seventh seventy shabby shack shaded shadily shading shadow shady shaft shakily shaking shaky shale shallot shallow shame shampoo shank shanty shape shaping share sharper sharpie sharply shawl sheath shed sheep sheet shelf shell shelter shelve sherry shield shifter shifty shimmer shimmy shindig shine shingle shining shiny ship shirt shock shone shopper shore shorten shorter shortly shorts shorty shout shove showbiz shower showing showman shown showoff showy shrank shriek shrill shrimp shrine shrink shrivel shrubs shrug shrunk shudder shuffle shun shush shut siamese sibling siding sierra siesta sift sighing silent silica silicon silk silly silo silt silver simile simple simply sincere singer singing single sinless sinner sinuous siren sister sitcom sitter sitting sixfold sixteen sixth sixties sizable sizably size sizing sizzle skater skating skeptic sketch skewed skewer skid skied skier skies skiing skilled skillet skimmed skimmer skinny skipper skirt skittle skyline skype skyward slab slacked slacker slacks slain slam slander slang slashed slate slather slaw sled sleek sleep sleet sleeve slept sliced slicer slicing slick slider sliding slimy slinky slip slit sliver slogan sloped sloping sloppy slot slouchy sludge slug slum slurp slush small smartly smasher smashup smell smile smirk smite smith smitten smock smog smoked smoking smoky smolder smooth smother smudge smudgy smugly snack snagged snaking snap snare snarl snazzy sneak sneer sneeze snide sniff snippet snitch snooper snooze snore snoring snorkel snort snout snowcap snowman snowy snub snuff snuggle snugly speak species specked specks speech speed speller spender spent spew sphere sphinx spider spied spiffy spill spilt spinach spinal spindle spinner spinout spiny spiral spirits splashy spleen splice splurge spoiled spoiler spoils spoken sponge spongy sponsor spoof spooky spool spoon spore sports sporty spotted spotter spotty spousal spouse spout sprain sprang sprawl spray spree sprig spring sprint sprite sprout spruce sprung spry spud spur sputter squad squall squash squeak squeeze squid squint squire squirt squishy stable stack stadium staff stage staging stained stamina stammer stamp stand stank staple starch stardom staring stark starlet starlit starry starter startle startup starved stash state static statue stature status statute staunch stays steam steed steep stellar stem stench stencil step stereo sterile sternum stew stick stiffen stiffly stifle stilt stimuli stinger stingy stinky stipend stir stitch stock stoic stoke stole stomp stoning stony stood stooge stool stoop stopped stopper storage storm stout stove stowing stratus straw stray streak stream street strep stress stretch strewn strict stride strife strike strive strobe strode struck strudel strum strung strut stubbed stubble stubbly stucco stuck student studied studio study stuffed stuffy stumble stump stung stunned stunner stunt stupor sturdy styling stylist stylus suave subdued subject sublet sublime subpar subplot subside subsidy subsoil subtext subtly subtype suburb subway subzero such suction sudden sudoku suds suffice suffix sugar suggest suing suitor sulfate sulfide sulfite sulfur sulk sullen sultry supper supply support supreme surely surface surfer surgery surging surname surpass surplus surreal survey survive sushi suspect suspend swab swagger swan swarm sway swear sweat sweep swell swept swerve swifter swiftly swimmer swinger swipe swirl switch swivel swizzle swooned swoop swoosh swore sworn swung symptom synapse synergy syrup system tabasco tabby tables tablet tabloid tacking tackle tacky taco tactful tactics tactile tadpole tainted take taking talcum tall talon tamale tamer tamper tank tanned tannery tanning tantrum tapered tapioca tapping taps target tarmac tarnish tarot tartar tartly task tassel taste tasting tasty tattle tattoo taunt tavern thank that thaw theater thee theft theme thermal thermos these thesis thicken thicket thigh thimble thing think thinly thinner thirsty thirty thong thorn those thrash thread thrift thrill thrive throat throng thrower thud thumb thus thyself tiara tibia tidal tidbit tidings tidy tiger tighten tightly tigress tile tiling till tilt timid timing timothy tinfoil tingle tingly tinker tinsel tint tinwork tiny tipoff tipped tipper tipping tiptop tiring tissue trace tracing track tractor trade trading traffic tragedy train traitor trance trapeze trapped trapper traps trash travel tray treason treat treble tree trekker tremble tremor trench trend triage trial tribune tribute triceps trickle tricky trident tried trifle trilogy trimmer trinity trio tripod triumph trivial trodden trophy tropics trouble trough trout trowel truce truck truffle trump trunks trustee truth tubby tubular tucking tuesday tuition tulip tumble tummy turban turbine turf turkey turmoil turret turtle tusk tutor tutu tweak tweed tweet twelve twenty twerp twice twiddle twig twine twins twirl twisted twister twisty twitch twitter tycoon tying tyke udder ultra umpire unable unaired unawake unaware unbaked unbend unbent unblock unboxed uncanny unchain uncheck uncivil unclad unclasp uncle unclip uncloak unclog uncork uncouth uncover uncross uncrown uncured uncut undated undead undergo undoing undone undress undying unearth unease uneasy uneaten unequal uneven unfair unfazed unfiled unfixed unfold unglue ungodly unhappy unheard unhinge unholy unhook unicorn unified unifier unify union unison unit unkempt unkind unknown unlaced unlatch unleash unless unlined unlit unloved unlucky unmade unmixed unmoral unmoved unnamed unnerve unpack unpaid unpaved unplug unquote unrated unread unreal unrest unripe unrobed unroll unruly unsafe unsaid unsaved unscrew unseen unsent unsnap unsold unstuck unsure unsworn untaken untamed untaxed untidy untie until untimed untold untried untrue untruth untwist untying unused unusual unvocal unwary unweave unwed unwell unwind unwired unworn unwound unwoven unzip upbeat upchuck update upfront upgrade upheld uphill uphold upload upon upper upright upriver uproar uproot upscale upside upstage upstart upstate upswing uptake uptight uptown upward upwind uranium urban urchin urgency urgent urging urology usable usage useable used user usher usual utensil utility utilize utmost utopia utter vacancy vacant vacate vaguely valiant valid valium valley value vanilla vanish vanity vantage varied variety various varmint varnish varsity varying vastly veal vegan veggie velcro velvet vending vendor venture venue venus verbose verdict verify verse version versus vertigo very vessel vest veteran veto viable vibes vice victory video viewer viewing village villain vintage violate violet violin viper viral virtual virus visa viscous visible visibly vision visitor visor vista vitally vividly vixen vocally voice voicing void volley voltage volumes voter voting voucher vowed vowel voyage wafer waffle waged wager wages waggle wagon wake waking walk walmart walnut walrus waltz wand wannabe wanted wanting wasabi washday washed washer washing washout washtub wasp wasting watch water waving wavy whacky wham wharf wheat whiff whinny whiny whoever whole whoopee whoops wick widely widen widget widow width wielder wife wifi wildcat wilder wildly willed willing willow wilt wimp wince wincing wind wing winking winner winter wipe wired wiring wiry wisdom wise wish wispy wistful wizard wobble wobbly wolf womanly womb woof wooing wool woozy word work worried worrier worry worst wound woven wrangle wrath wreath wrecker wrench wriggle wriggly wrinkle wrinkly wrist writing written wronged wrongly wrought xbox xerox yahoo yanking yapping yard yarn yeah yearly yeast yelling yelp yiddish yield yippee yodel yoga yogurt yonder yoyo yummy zealous zebra zero zesty zipfile zipping zippy zips zodiac zombie zone zoning zoology zoom".split(" ");
+    const G = { mode: "phrase", words: 4, caps: true, num: true, len: 20, sym: true, value: "", bits: 0 };
+    function rnd(n) { const lim = Math.floor(0x100000000 / n) * n, a = new Uint32Array(1); let x; do { crypto.getRandomValues(a); x = a[0]; } while (x >= lim); return x % n; }
+    function generate() {
+      if (G.mode === "phrase") {
+        const w = Array.from({ length: G.words }, () => WORDLIST[rnd(WORDLIST.length)]).map(x => G.caps ? x[0].toUpperCase() + x.slice(1) : x);
+        if (G.num) { const i = rnd(w.length); w[i] += String(10 + rnd(90)); }
+        G.value = w.join("-"); G.bits = G.words * Math.log2(WORDLIST.length) + (G.num ? Math.log2(90 * G.words) : 0);
+      } else {
+        const sets = ["abcdefghijkmnopqrstuvwxyz", "ABCDEFGHJKLMNPQRSTUVWXYZ", "23456789"].concat(G.sym ? ["!@#$%&*?-_=+"] : []), all = sets.join("");
+        let c; do { c = Array.from({ length: G.len }, () => all[rnd(all.length)]); } while (!sets.every(s => c.some(ch => s.includes(ch))));
+        G.value = c.join(""); G.bits = G.len * Math.log2(all.length);
+      }
+    }
+    function genPanel() {
+      if (!G.value) generate();
+      const p = panel("Need a new one?", "Made on your device with secure randomness. Nothing is sent or saved.");
+      const box = el("div", "gen"); p.append(box);
+      const build = () => {
+        box.replaceChildren();
+        const modes = el("div", "seg");
+        [["phrase", "Passphrase"], ["random", "Random characters"]].forEach(([m, label]) => { const b = el("button", "chipbtn", label); b.type = "button"; b.setAttribute("aria-pressed", String(G.mode === m)); b.addEventListener("click", () => { G.mode = m; generate(); build(); }); modes.append(b); });
+        const outEl = el("div", "genout", G.value);
+        const info = el("p", "hint"); info.style.margin = "0";
+        info.textContent = `About ${Math.round(G.bits)} bits of randomness. Would take ${duration(Math.pow(2, G.bits) / 2 / 1e10).toLowerCase()} to crack offline.`;
+        const ctl = el("div", "genrow");
+        const range = el("input"); range.type = "range"; range.id = "gen-size";
+        if (G.mode === "phrase") { range.min = 3; range.max = 8; range.value = G.words; } else { range.min = 12; range.max = 40; range.value = G.len; }
+        const val = el("span", "val", G.mode === "phrase" ? `${G.words} words` : `${G.len} chars`);
+        range.setAttribute("aria-label", G.mode === "phrase" ? "Number of words" : "Number of characters");
+        range.addEventListener("input", () => { if (G.mode === "phrase") G.words = +range.value; else G.len = +range.value; generate(); build(); const r2 = document.getElementById("gen-size"); if (r2) r2.focus(); });
+        ctl.append(range, val);
+        const toggle = (id, label, key) => { const l = el("label", "tg"); const i = el("input"); i.type = "checkbox"; i.id = id; i.checked = G[key]; i.addEventListener("change", () => { G[key] = i.checked; generate(); build(); }); l.append(i, document.createTextNode(label)); return l; };
+        const opts = el("div", "genrow");
+        if (G.mode === "phrase") opts.append(toggle("gen-caps", "Capitals", "caps"), toggle("gen-num", "Add a number", "num"));
+        else opts.append(toggle("gen-sym", "Symbols", "sym"));
+        const btns = el("div", "genrow");
+        const again = el("button", "btnp", "New one"); again.type = "button"; again.addEventListener("click", () => { generate(); build(); });
+        const test = el("button", "copybtn", "Test this one"); test.type = "button";
+        test.addEventListener("click", () => { if (!pwInput) return; pwInput.value = G.value; window.scrollTo({ top: 0, behavior: "smooth" }); if (pwForm.requestSubmit) pwForm.requestSubmit(); else pwForm.dispatchEvent(new Event("submit", { cancelable: true })); });
+        btns.append(again, copyButton(() => G.value), test);
+        box.append(modes, outEl, info, ctl, opts, btns);
+      };
+      build();
+      return p;
+    }
+
+    function analyse(pw) {
+      const lower = pw.toLowerCase(), traits = [];
+      let pool = 0;
+      if (/[a-z]/.test(pw)) pool += 26; if (/[A-Z]/.test(pw)) pool += 26; if (/\d/.test(pw)) pool += 10; if (/[^A-Za-z0-9]/.test(pw)) pool += 33;
+      let bits = pw.length * Math.log2(Math.max(pool, 1));
+      if (COMMON.includes(lower) || COMMON.includes(lower.replace(/[!@#$%^&*?.]+$/, ""))) { bits = Math.min(bits, 10); traits.push(["One of the most common passwords", "bad"]); }
+      const word = WORDS.find(w => lower.replace(/[@4]/g, "a").replace(/0/g, "o").replace(/[1!]/g, "i").replace(/3/g, "e").replace(/\$/g, "s").includes(w));
+      if (word) { bits -= 16; traits.push([`Contains a common word ("${word}")`, "bad"]); }
+      if (/(19|20)\d{2}/.test(pw)) { bits -= 8; traits.push(["Contains a year", "warn"]); }
+      if (/^[A-Z]?[a-z]+\d{1,4}[!@#$%^&*?.]?$/.test(pw)) { bits = Math.min(bits, 34); traits.push(["Predictable pattern: Word + number + symbol", "bad"]); }
+      if (/(.)\1{2,}/.test(pw)) { bits -= 8; traits.push(["Repeated characters", "warn"]); }
+      for (const s of SEQS) for (let i = 0; i + 4 <= s.length; i++) { const sub = s.slice(i, i + 4); if (lower.includes(sub) || lower.includes([...sub].reverse().join(""))) { bits -= 10; traits.push(["Keyboard or alphabet sequence", "warn"]); i = 99; break; } }
+      if (pw.length < 12) traits.push([`Only ${pw.length} characters (aim for 14+)`, pw.length < 8 ? "bad" : "warn"]);
+      if (pw.length >= 16) traits.push([`${pw.length} characters long`, "good"]);
+      if (pool >= 95) traits.push(["Mixes letters, numbers and symbols", "good"]);
+      bits = Math.max(0, bits);
+      const seconds = Math.pow(2, bits) / 2 / 1e10;
+      const level = bits < 28 ? 0 : bits < 40 ? 1 : bits < 60 ? 2 : bits < 80 ? 3 : 4;
+      return { bits: Math.round(bits), seconds, level, traits: [...new Map(traits.map(t => [t[0], t])).values()] };
+    }
+    function duration(s) {
+      if (s < 1) return "Instantly";
+      const u = [["second", 60], ["minute", 60], ["hour", 24], ["day", 365], ["year", 1000], ["thousand years", 1000], ["million years", 1000]];
+      let v = s, i = 0; while (i < u.length - 1 && v >= u[i][1]) { v /= u[i][1]; i++; }
+      if (i === u.length - 1 && v >= 1000) return "Billions of years";
+      const n = Math.round(v); return `${n} ${u[i][0]}${n === 1 || u[i][0].includes(" ") ? "" : "s"}`;
+    }
+    const LEVELS = [["Very weak", "var(--bad)"], ["Weak", "var(--bad)"], ["Fair", "var(--warn)"], ["Strong", "var(--good)"], ["Very strong", "var(--good)"]];
+    async function sha1(s) { const b = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("").toUpperCase(); }
+
+    function render(a, breach, isExample, hashInfo) {
+      out.replaceChildren();
+      const [lvlName, lvlColour] = LEVELS[a.level];
+      const pwned = breach && breach.count > 0;
+      const state = pwned ? "bad" : a.level >= 3 ? "good" : a.level === 2 ? "warn" : "bad";
+      dial.set({ value: pwned ? compact(breach.count) : lvlName.split(" ").pop().toUpperCase().slice(0, 6), sub: pwned ? "TIMES LEAKED" : "STRENGTH", colour: pwned || a.level < 2 ? "#ff8b77" : a.level === 2 ? "#f3b75c" : "#6fd59c", blips: pwned ? 8 : 0 });
+      const title = pwned ? `This password has appeared in ${fmt(breach.count)} breaches` : breach ? `Not found in any known breach, and rated ${lvlName.toLowerCase()}` : `Rated ${lvlName.toLowerCase()}`;
+      const body = pwned ? "Attackers try leaked passwords first. Stop using it everywhere, even if it looks complex." : breach ? (a.level >= 3 ? "It isn't on any leaked list and would take a long time to crack." : "It isn't on any leaked list, but it's guessable. Make it longer.") : "Press Check to also see whether it appears in leaked password lists.";
+      out.append(verdict(state, pwned ? "Leaked" : breach ? "Not leaked" : "Strength only", title, body, isExample, gauge(Math.min(100, a.bits * 1.1), "protect", "Strength")));
+      out.append(figures([[lvlName, "strength rating", lvlColour], [duration(a.seconds), "to crack offline at 10 billion guesses a second"], [String(a.bits), "bits of estimated entropy"], [breach ? (pwned ? compact(breach.count) : "0") : "—", "times seen in breaches", pwned ? "var(--bad)" : breach ? "var(--good)" : ""]]));
+
+      const g2 = el("div", "grid2");
+      const p1 = panel("What makes it strong or weak", "Assessed on your device as you type.");
+      const meter = el("div", "meter"); for (let i = 0; i < 5; i++) { const s = el("i"); if (i <= a.level) s.style.background = lvlColour; meter.append(s); }
+      const traits = el("div", "traits"); (a.traits.length ? a.traits : [["No obvious weaknesses found", "good"]]).forEach(([t, c]) => traits.append(el("span", "pill " + c, t)));
+      p1.append(meter, traits);
+      const p2 = panel("How your password stays private", "It never leaves your device. Only a 5-character fragment of its fingerprint does.");
+      const flow = el("div", "flow");
+      const hx = hashInfo || { full: "5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8" };
+      [["1. You type", "••••••••", "Stays in your browser"], ["2. Fingerprint", hx.full.slice(0, 12) + "…", "SHA-1 hash, made locally"], ["3. Sent", hx.full.slice(0, 5), "First 5 characters only"], ["4. Compared", "~800 matches", "Checked on your device"]]
+        .forEach(([b, c, s]) => { const d = el("div"); d.append(el("b", null, b), el("code", null, c), el("span", null, s)); flow.append(d); });
+      p2.append(flow);
+      g2.append(p1, p2); out.append(g2);
+      out.append(genPanel());
+      out.append(stepsPanel("Better passwords", "What we recommend to every client.", [
+        ["Use passphrases", "three or four random words, like river-candle-orbit-plum, are long and memorable."],
+        ["Never reuse", "one breached site shouldn't unlock your email, bank or Microsoft 365."],
+        ["Use a password manager", "it creates and remembers a unique password for every account."],
+        ["Add MFA", "so a stolen password alone isn't enough to get in."]
+      ]));
+      out.append(cta("Dragon Defence can roll out a business password manager and MFA across your team, with training so it actually gets used."));
+    }
+    let busy = false;
+    function mount() {
+      const f = searchForm({ id: "pw-input", label: "Password", type: "password", placeholder: "Type a password to test", button: "Check password", reveal: true, autocomplete: "new-password" });
+      pwInput = f.input; pwForm = f.form;
+      dial = buildHero({ eyebrow: "Password check", title: 'Is your password <span class="hl">already out there</span>?', lede: "Rates how quickly a password could be cracked and checks it against more than a billion passwords exposed in breaches, without the password ever leaving your device. Need a new one? There's a generator below the results.", form: f.form,
+        fine: [document.createTextNode("Uses Have I Been Pwned's "), extA("Pwned Passwords", "https://haveibeenpwned.com/Passwords"), document.createTextNode(" service with k-anonymity. We never see or store what you type. "), exLink("See an example result", () => showSample())] });
+      let t;
+      f.input.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { if (f.input.value) render(analyse(f.input.value), null, false); }, 180); });
+      f.form.addEventListener("submit", async (e) => {
+        e.preventDefault(); const pw = f.input.value;
+        if (!pw) { errorBox("Type a password first", "Enter the password you'd like to test. It stays on your device."); f.input.focus(); return; }
+        if (busy) return; busy = true; f.button.disabled = true;
+        const a = analyse(pw); dial.set({ scanning: true });
+        try {
+          if (!(window.crypto && crypto.subtle)) throw new Error("no crypto");
+          const full = await sha1(pw), prefix = full.slice(0, 5), suffix = full.slice(5);
+          let res;
+          try { res = await fetch("https://api.pwnedpasswords.com/range/" + prefix, { headers: { "Add-Padding": "true" } }); }
+          catch { res = await fetch("https://api.pwnedpasswords.com/range/" + prefix); }
+          if (!res.ok) throw new Error("hibp " + res.status);
+          const text = await res.text();
+          const line = text.split(/\r?\n/).find(l => l.startsWith(suffix + ":"));
+          render(a, { count: line ? parseInt(line.split(":")[1], 10) || 0 : 0 }, false, { full });
+        } catch (err) {
+          render(a, null, false);
+          out.prepend(verdict("err", "Breach list unavailable", "Strength shown, but the leaked-password check couldn't run", NET_ERR));
+        } finally { busy = false; f.button.disabled = false; }
+      });
+      function showSample() { f.input.value = ""; render(analyse("Summer2024!"), { count: 1268 }, true, { full: "B6C7A9B3E4D2F1A0C8E5D7B9A1F3C2E4D6B8A0F2" }); }
+      showSample();
+      foot.replaceChildren(el("div", null, "Strength estimates assume an attacker with a fast, offline copy of a password database. Leaked-password data from Have I Been Pwned's Pwned Passwords service; the example result uses illustrative figures."));
+    }
+    return { mount };
+  })();
+
+  // ================= Shared: domain registration lookup (used by the QR check) =================
+  const Expiry = (() => {
+    async function fetchT(url, ms) {
+      const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), ms);
+      try { return await fetch(url, { signal: ctrl.signal }); } finally { clearTimeout(t); }
+    }
+    function vcardName(ent) {
+      try { const v = ent.vcardArray[1].find(x => x[0] === "fn"); if (v && v[3]) return String(v[3]); } catch {}
+      return ent.handle || null;
+    }
+    function findRole(ents, role) {
+      for (const e of ents || []) { if ((e.roles || []).includes(role)) return e; const n = findRole(e.entities, role); if (n) return n; }
+      return null;
+    }
+    function parseRdap(j) {
+      const ev = (name) => ((j.events || []).find(e => e.eventAction === name) || {}).eventDate || null;
+      const reg = findRole(j.entities, "registrar");
+      return {
+        expires: ev("expiration"), registered: ev("registration"), updated: ev("last changed") || ev("last update of RDAP database"),
+        registrar: reg ? vcardName(reg) : null, status: (j.status || []).map(String),
+        ns: (j.nameservers || []).map(n => String(n.ldhName || "").toLowerCase()).filter(Boolean),
+        dnssec: !!(j.secureDNS && j.secureDNS.delegationSigned)
+      };
+    }
+    async function rdap(domain) {
+      const urls = [`https://rdap.org/domain/${domain}`];
+      if (/\.uk$/.test(domain)) urls.unshift(`https://rdap.nominet.uk/uk/domain/${domain}`);
+      for (const u of urls) {
+        try { const r = await fetchT(u, 15000); if (r.status === 404) return { notFound: true }; if (r.ok) return parseRdap(await r.json()); } catch {}
+      }
+      return null;
+    }
+    return { rdap };
+  })();
+
+  // ================= Shared: copy button =================
+  function copyButton(getText, label) {
+    const b = el("button", "copybtn", label || "Copy"); b.type = "button";
+    b.addEventListener("click", async () => {
+      const t = typeof getText === "function" ? getText() : getText;
+      try { await navigator.clipboard.writeText(t); b.textContent = "Copied"; }
+      catch { b.textContent = "Select and copy"; }
+      setTimeout(() => b.textContent = label || "Copy", 1600);
+    });
+    return b;
+  }
+
+  // ================= Tool: QR code check =================
+  const QR = (() => {
+    const JSQR_URL = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";
+    let dial, stream = null, raf = 0, libP = null, busy = false;
+    const SHORTENERS = ["bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "is.gd", "buff.ly", "rebrand.ly", "cutt.ly", "shorturl.at", "tiny.cc", "rb.gy", "bl.ink", "short.io", "qrco.de", "qr.page", "qrfy.io", "linktr.ee", "s.id", "t.ly", "lnkd.in", "trib.al", "v.gd", "shorturl.com", "urlz.fr", "me-qr.com", "qr-code-generator.com", "q-r.to"];
+    const RISKY_TLDS = ["zip", "mov", "xyz", "top", "click", "quest", "cfd", "sbs", "rest", "icu", "buzz", "lol", "cyou", "monster", "support", "live", "online", "site", "shop", "info", "work", "fit", "gq", "tk", "ml", "cf", "ga", "su", "ru", "cn"];
+    // brand → its genuine registrable domains
+    const BRANDS = {
+      microsoft: ["microsoft.com", "microsoftonline.com", "live.com", "office.com", "office365.com", "outlook.com", "sharepoint.com", "onedrive.com", "cloud.microsoft", "microsoft365.com", "aka.ms", "msft.it"],
+      office: ["office.com", "office365.com", "microsoft.com", "microsoft365.com"], outlook: ["outlook.com", "live.com", "office.com", "microsoft.com"],
+      onedrive: ["onedrive.com", "live.com", "microsoft.com", "sharepoint.com"], sharepoint: ["sharepoint.com", "microsoft.com"],
+      apple: ["apple.com", "icloud.com", "apple.co"], icloud: ["icloud.com", "apple.com"], google: ["google.com", "google.co.uk", "goo.gl", "g.co", "youtube.com"],
+      paypal: ["paypal.com", "paypal.me", "paypal.co.uk"], amazon: ["amazon.co.uk", "amazon.com", "amzn.to", "amzn.eu", "amazon.de"],
+      hmrc: ["gov.uk", "tax.service.gov.uk"], govuk: ["gov.uk"], dvla: ["gov.uk"], nhs: ["nhs.uk"], royalmail: ["royalmail.com"], evri: ["evri.com"], dpd: ["dpd.co.uk", "dpdlocal.co.uk"], dhl: ["dhl.com", "dhl.co.uk"], parcelforce: ["parcelforce.com"],
+      barclays: ["barclays.co.uk", "barclays.com"], hsbc: ["hsbc.co.uk", "hsbc.com"], lloyds: ["lloydsbank.com", "lloydsbank.co.uk"], natwest: ["natwest.com"], santander: ["santander.co.uk"], nationwide: ["nationwide.co.uk"], monzo: ["monzo.com", "monzo.me"], starling: ["starlingbank.com"], halifax: ["halifax.co.uk"],
+      docusign: ["docusign.com", "docusign.net"], adobe: ["adobe.com"], dropbox: ["dropbox.com"], wetransfer: ["wetransfer.com", "we.tl"], netflix: ["netflix.com"], facebook: ["facebook.com", "fb.com", "fb.me"], instagram: ["instagram.com"], linkedin: ["linkedin.com", "lnkd.in"], whatsapp: ["whatsapp.com", "wa.me"],
+      xero: ["xero.com"], ringgo: ["ringgo.co.uk", "myringgo.co.uk"], paybyphone: ["paybyphone.co.uk", "paybyphone.com"], justpark: ["justpark.com"], evcharge: []
+    };
+    const BRAND_NAMES = { microsoft: "Microsoft", office: "Microsoft Office", outlook: "Outlook", onedrive: "OneDrive", sharepoint: "SharePoint", apple: "Apple", icloud: "iCloud", google: "Google", paypal: "PayPal", amazon: "Amazon", hmrc: "HMRC", govuk: "GOV.UK", dvla: "DVLA", nhs: "the NHS", royalmail: "Royal Mail", evri: "Evri", dpd: "DPD", dhl: "DHL", parcelforce: "Parcelforce", barclays: "Barclays", hsbc: "HSBC", lloyds: "Lloyds", natwest: "NatWest", santander: "Santander", nationwide: "Nationwide", monzo: "Monzo", starling: "Starling", halifax: "Halifax", docusign: "DocuSign", adobe: "Adobe", dropbox: "Dropbox", wetransfer: "WeTransfer", netflix: "Netflix", facebook: "Facebook", instagram: "Instagram", linkedin: "LinkedIn", whatsapp: "WhatsApp", xero: "Xero", ringgo: "RingGo", paybyphone: "PayByPhone", justpark: "JustPark" };
+    const SECOND_LEVEL = /\.(co|org|ac|gov|ltd|plc|me|net|sch|nhs|police|mod|com|edu)\.(uk|au|nz|za|in|jp|kr|br|mx|tr|cn|hk|sg|my|id|ph|th|vn|ar|co)$/;
+    const regDomain = (host) => { host = host.replace(/^www\./, ""); const p = host.split("."); return p.slice(SECOND_LEVEL.test(host) && p.length > 2 ? -3 : -2).join("."); };
+    const unleet = (s) => s.replace(/0/g, "o").replace(/[1l|]/g, "l").replace(/3/g, "e").replace(/4|@/g, "a").replace(/5|\$/g, "s").replace(/7/g, "t").replace(/rn/g, "m").replace(/vv/g, "w");
+    function lev(a, b) {
+      const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+      for (let j = 1; j <= b.length; j++) d[0][j] = j;
+      for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      return d[a.length][b.length];
+    }
+    const isOfficial = (brand, reg, host) => (BRANDS[brand] || []).some(d => reg === d || host === d || host.endsWith("." + d));
+
+    // ---------- What's in the code ----------
+    function classify(raw) {
+      const t = String(raw || "").trim();
+      if (/^WIFI:/i.test(t)) {
+        const f = (k) => { const m = t.match(new RegExp("[:;]" + k + ":((?:\\\\.|[^;])*)", "i")); return m ? m[1].replace(/\\(.)/g, "$1") : ""; };
+        return { kind: "wifi", ssid: f("S"), auth: (f("T") || "nopass").toUpperCase(), password: f("P"), hidden: /true/i.test(f("H")) };
+      }
+      if (/^(SMSTO|SMS):/i.test(t)) { const p = t.replace(/^(SMSTO|SMS):/i, "").split(":"); return { kind: "sms", number: p[0].split("?")[0], body: p.slice(1).join(":") || decodeURIComponent((t.match(/body=([^&]*)/i) || [])[1] || "") }; }
+      if (/^tel:/i.test(t)) return { kind: "tel", number: t.slice(4) };
+      if (/^mailto:/i.test(t) || /^MATMSG:/i.test(t)) {
+        if (/^MATMSG:/i.test(t)) return { kind: "email", to: (t.match(/TO:([^;]*)/i) || [])[1] || "", subject: (t.match(/SUB:([^;]*)/i) || [])[1] || "" };
+        const u = t.slice(7); return { kind: "email", to: decodeURIComponent(u.split("?")[0]), subject: decodeURIComponent((u.match(/subject=([^&]*)/i) || [])[1] || "") };
+      }
+      if (/^BEGIN:VCARD/i.test(t)) return { kind: "vcard", name: ((t.match(/\nFN[^:]*:([^\r\n]*)/i) || [])[1] || "").trim(), text: t };
+      if (/^BEGIN:VEVENT|^BEGIN:VCALENDAR/i.test(t)) return { kind: "event", title: ((t.match(/\nSUMMARY[^:]*:([^\r\n]*)/i) || [])[1] || "").trim(), text: t };
+      if (/^geo:/i.test(t)) return { kind: "geo", text: t };
+      if (/^(javascript|data|vbscript|file):/i.test(t)) return { kind: "script", text: t };
+      let s = t, bare = false;
+      if (!/\s/.test(s) && (/^www\.[^\s]+\.[a-z]{2,}/i.test(s) || /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}(\/|$)/i.test(s))) { s = "https://" + s; bare = true; }
+      if (/^https?:\/\//i.test(s)) { try { return { kind: "url", url: new URL(s), raw: t, bare }; } catch {} }
+      if (/^[a-z][a-z0-9+.-]{1,30}:/i.test(t) && !/\s/.test(t.split(":")[0])) return { kind: "app", scheme: t.split(":")[0], text: t };
+      return { kind: "text", text: t };
+    }
+
+    // ---------- Offline checks on a web link ----------
+    function urlChecks(u, bare) {
+      const host = u.hostname.toLowerCase().replace(/\.$/, ""), reg = regDomain(host), label = reg.split(".")[0], tld = host.split(".").pop();
+      const full = u.href.toLowerCase(), pathq = (u.pathname + u.search + u.hash).toLowerCase();
+      const out = []; let brandHit = null;
+      const isIp = /^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.startsWith("[");
+      if (u.username || u.password) out.push({ status: "fail", name: "Hidden destination trick", what: `Everything before the “@” is ignored. This link really goes to ${host}.` });
+      if (isIp) out.push({ status: "fail", name: "Uses a bare IP address", what: `It goes to ${host} rather than a named website. Genuine businesses almost never do this.` });
+      if (/(^|\.)xn--/.test(host)) out.push({ status: "fail", name: "Look-alike characters in the address", what: "The address uses international characters, which can imitate a real brand letter for letter." });
+      if (bare) out.push({ status: "info", name: "Address without http or https", what: "The code just contains a web address. Your phone will open it as a normal website.", label: "Note" });
+      if (u.protocol === "http:") out.push({ status: "warn", name: "Not encrypted (no HTTPS)", what: "Anything typed on this page can be read in transit. Never enter passwords or card details on it." });
+      if (u.port && !["80", "443"].includes(u.port)) out.push({ status: "warn", name: `Unusual port (${u.port})`, what: "Normal websites don't need a port number in the address." });
+      if (!isIp) {
+        for (const b of Object.keys(BRANDS)) {
+          const inHost = host.replace(/[-.]/g, " ").split(" ").some(p => p.includes(b)) || host.includes(b);
+          const inPath = new RegExp("(^|[^a-z])" + b + "([^a-z]|$)").test(pathq) && /login|log-in|signin|sign-in|verify|password|account|payment|billing|secure|unlock|suspend|refund/.test(pathq);
+          if ((inHost || inPath) && !isOfficial(b, reg, host) && b !== "evcharge") { brandHit = b; out.push({ status: inHost ? "fail" : "warn", name: `Mentions ${BRAND_NAMES[b]}, but isn't ${BRAND_NAMES[b]}`, what: `The real owner is ${reg}. ${inHost ? "Brand names in the address are a common disguise." : "The brand name appears in the link but the site belongs to someone else."}` }); break; }
+          const ul = unleet(label);
+          if (!inHost && b.length >= 5 && ul !== label && ul.includes(b) && !isOfficial(b, reg, host)) { brandHit = b; out.push({ status: "fail", name: `Look-alike of ${BRAND_NAMES[b]}`, what: `“${reg}” swaps letters for numbers or symbols to look like ${BRAND_NAMES[b]}. It isn't their website.` }); break; }
+          if (!inHost && b.length >= 5 && label !== b && !isOfficial(b, reg, host) && (ul === b || (lev(ul, b) <= (b.length >= 8 ? 2 : 1) && Math.abs(ul.length - b.length) <= 2))) { brandHit = b; out.push({ status: "fail", name: `Look-alike of ${BRAND_NAMES[b]}`, what: `“${reg}” is spelt to look like ${BRAND_NAMES[b]}, but it isn't their website.` }); break; }
+        }
+      }
+      if (SHORTENERS.some(s => host === s || host.endsWith("." + s))) out.push({ status: "warn", name: "Shortened link", what: `${host} hides the final destination, so it can't be checked from here. Be wary of shortened links on posters, parking meters and letters.` });
+      if (!isIp && RISKY_TLDS.includes(tld)) out.push({ status: "warn", name: `.${tld} address`, what: `Cheap .${tld} domains are heavily used for scam sites. Not proof on its own.` });
+      if (!isIp && host.split(".").length - reg.split(".").length >= 3) out.push({ status: "warn", name: "Unusually long web address", what: `${host} has many parts, a common way to bury the real owner (${reg}) at the end.` });
+      if (/[?&](url|u|redirect|redirect_uri|redir|next|target|dest|destination|continue|goto|return|returnurl)=(https?|%2f%2f|https?%3a)/i.test(u.search)) out.push({ status: "warn", name: "Bounces to another site", what: "The link passes you on to a different address, a common way to hide where it really ends up." });
+      const words = (pathq.match(/login|log-in|signin|sign-in|verify|verification|account|password|passcode|payment|pay|invoice|billing|secure|update|unlock|suspend|wallet|refund|reward|prize|parking|fine|penalty|delivery|parcel|redeliver|mfa|2fa|otp/g) || []);
+      const uniq = [...new Set(words)];
+      if (uniq.length) out.push({ status: (brandHit || out.some(x => x.status !== "info")) && uniq.length ? "warn" : "info", name: "Asks you to sign in or pay", what: `The link mentions ${uniq.slice(0, 4).join(", ")}. Scam QR codes usually lead to fake login, parking or payment pages.` });
+      if (/\.(apk|exe|msi|dmg|zip|rar|7z|scr|bat|js|iso|img|mobileconfig|ipa)(\?|#|$)/i.test(u.pathname)) out.push({ status: "fail", name: "Downloads a file", what: "This link downloads a file or app rather than opening a web page. Don't install anything from a QR code." });
+      if (full.length > 200) out.push({ status: "info", name: "Very long link", what: "Long links often carry tracking or your email address. Not dangerous on its own." });
+      return { host, reg, out, isIp };
+    }
+
+    // ---------- Live checks: does it exist, how old is it ----------
+    async function liveChecks(c) {
+      if (c.isIp) return [];
+      const res = [];
+      const [a, reg] = await Promise.all([dns(c.host, "A").catch(() => null), Expiry.rdap(c.reg).catch(() => null)]);
+      if (a && a.Status === 3) res.push({ status: "fail", name: "Website doesn't exist", what: `${c.host} has no DNS records. The link is broken or the site has been taken down.` });
+      if (reg && !reg.notFound && reg.registered) {
+        const days = Math.floor((Date.now() - new Date(reg.registered)) / 864e5);
+        const when = new Date(reg.registered).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+        res.age = days;
+        if (days < 30) res.push({ status: "fail", name: `Registered ${days} day${days === 1 ? "" : "s"} ago`, what: `${c.reg} was registered on ${when}. Most scam sites are only days or weeks old.` });
+        else if (days < 180) res.push({ status: "warn", name: `Registered ${Math.round(days / 30)} months ago`, what: `${c.reg} is fairly new (${when}). Take extra care if it asks you to sign in or pay.` });
+        else res.push({ status: "pass", name: `Established domain (${days >= 730 ? Math.floor(days / 365) + " years" : Math.round(days / 30) + " months"} old)`, what: `${c.reg} was registered on ${when}${reg.registrar ? " with " + reg.registrar : ""}.` });
+      } else if (reg && reg.notFound) res.push({ status: "fail", name: "Domain isn't registered", what: `Nobody owns ${c.reg}. The link can't lead anywhere genuine.` });
+      else res.push({ status: "info", name: "Couldn't check the domain's age", what: "The domain registry didn't answer. Treat an unfamiliar address with care.", label: "Unknown" });
+      return res;
+    }
+
+    // ---------- Render ----------
+    function verdictOf(checks) { return checks.some(c => c.status === "fail") ? "bad" : checks.some(c => c.status === "warn") ? "warn" : "good"; }
+    function linkBox(c, u, st) {
+      const p = panel("Where it really goes", "The link hasn't been opened.");
+      const box = el("div", "qr-link");
+      const domLine = el("div", "qr-dom"); domLine.append(el("span", null, "Website owner: "), el("b", null, c.reg)); box.append(domLine);
+      const code = el("code"); const href = u.href;
+      const i = href.toLowerCase().indexOf(c.reg, href.toLowerCase().indexOf("//") + 2);
+      if (i > 0) { code.append(document.createTextNode(href.slice(0, i))); code.append(el("mark", null, href.slice(i, i + c.reg.length))); code.append(document.createTextNode(href.slice(i + c.reg.length))); }
+      else code.textContent = href;
+      box.append(code);
+      const acts = el("div", "genrow");
+      acts.append(copyButton(href, "Copy link"));
+      const open = el("a", "copybtn", st === "bad" ? "Open anyway" : "Open link ↗"); open.href = href; open.target = "_blank"; open.rel = "noopener noreferrer"; open.style.textDecoration = "none";
+      if (st === "bad") { let armed = false; open.addEventListener("click", (e) => { if (!armed) { e.preventDefault(); armed = true; open.textContent = "Tap again: I understand the risk"; open.classList.add("danger"); setTimeout(() => { armed = false; open.textContent = "Open anyway"; open.classList.remove("danger"); }, 4000); } }); }
+      acts.append(open);
+      box.append(acts); p.append(box); return p;
+    }
+    async function render(raw, isExample, sampleLive) {
+      out.replaceChildren();
+      const c = classify(raw);
+      let checks = [], title = "", body = "", tag = "", extraPanels = [];
+      if (c.kind === "url") {
+        const u = c.url, uc = urlChecks(u, c.bare);
+        loading(`Checking ${uc.reg}…`); dial.set({ scanning: true });
+        const live = sampleLive || (isExample ? [] : await liveChecks(uc));
+        if (current !== "qr") return;
+        out.replaceChildren();
+        checks = uc.out.concat(live);
+        const st = verdictOf(checks);
+        tag = st === "bad" ? "Don't open" : st === "warn" ? "Be careful" : "No warning signs";
+        title = st === "bad" ? `This QR code looks like a scam` : st === "warn" ? `Check before you open this link` : `Goes to ${uc.reg}`;
+        body = st === "bad" ? `It leads to ${uc.reg}. Don't enter passwords, card details or personal information. If you need the service, type its address yourself or use its app.` :
+          st === "warn" ? `It leads to ${uc.reg}. Make sure that's who you expect, especially before signing in or paying.` :
+          `Nothing suspicious found. Make sure ${uc.reg} is who you expect: a clean result can't guarantee a page is genuine.`;
+        dial.set({ value: st === "bad" ? "STOP" : st === "warn" ? "CHECK" : "OK", sub: "QR VERDICT", colour: st === "bad" ? "#ff8b77" : st === "warn" ? "#f3b75c" : "#6fd59c", blips: checks.filter(x => x.status === "fail").length });
+        out.append(verdict(st, tag, title, body, isExample));
+        out.append(linkBox(uc, u, st));
+      } else {
+        const ex = {
+          wifi: () => { const open = c.auth === "NOPASS" || !c.password; checks = [{ status: open ? "warn" : c.auth === "WEP" ? "warn" : "pass", name: open ? "Open network, no password" : c.auth === "WEP" ? "Old WEP security" : "Password-protected network", what: open ? "Anyone nearby can see unencrypted traffic. Use a VPN or mobile data for anything sensitive." : c.auth === "WEP" ? "WEP can be cracked in minutes." : `Secured with ${c.auth}.` }, { status: "info", name: "Check it's the real network", what: "Fake hotspots copy the names of cafés and hotels. Ask staff for the exact network name.", label: "Tip" }]; title = `Joins the Wi-Fi network “${c.ssid || "unnamed"}”`; body = "Scanning this in the Camera app offers to join the network automatically."; const p = panel("Network details"); const dl = el("dl", "kv"); [["Network name", c.ssid || "—"], ["Security", c.auth === "NOPASS" ? "None" : c.auth], ["Password", c.password || "—"], ["Hidden network", c.hidden ? "Yes" : "No"]].forEach(([k, v]) => { dl.append(el("dt", null, k), el("dd", null, v)); }); p.append(dl); extraPanels.push(p); },
+          sms: () => { const prem = /^(\+?44)?0?(9|87|84|70)/.test(c.number.replace(/\s/g, "")) || /^\d{5}$/.test(c.number); checks = [{ status: prem ? "fail" : "warn", name: prem ? "Premium-rate or short code number" : "Sends a text message", what: prem ? "Texting this number may be charged at a premium rate or sign you up to a paid service." : "The message is pre-written. Read it before sending." }]; title = `Sends a text to ${c.number}`; body = c.body ? `Pre-written message: “${c.body}”` : "No message text is included."; },
+          tel: () => { const prem = /^(\+?44)?0?(9|87|84|70)/.test(c.number.replace(/\s/g, "")); checks = [{ status: prem ? "fail" : "info", name: prem ? "Premium-rate number" : "Calls a phone number", what: prem ? "Calls to 09, 087, 084 and 070 numbers can be very expensive, and 070 numbers are often used by scammers." : "Check the number matches the organisation's official contact details.", label: prem ? undefined : "Note" }]; title = `Calls ${c.number}`; body = "Your phone will offer to call this number."; },
+          email: () => { checks = [{ status: "info", name: "Writes an email", what: `Opens a new email to ${c.to}${c.subject ? " with the subject “" + c.subject + "”" : ""}. Nothing is sent until you press Send.`, label: "Note" }]; title = `Emails ${c.to}`; body = "Check the address belongs to who you expect."; },
+          vcard: () => { checks = [{ status: "info", name: "Adds a contact", what: "Saving it is harmless, but scammers sometimes use contact cards to make their number look official.", label: "Note" }]; title = `Contact card${c.name ? " for " + c.name : ""}`; body = "Saves a name and contact details to your phone."; },
+          event: () => { checks = [{ status: "info", name: "Adds a calendar event", what: "Check any links inside the event before opening them.", label: "Note" }]; title = `Calendar event${c.title ? ": " + c.title : ""}`; body = "Adds an event to your calendar."; },
+          geo: () => { checks = [{ status: "pass", name: "Opens a map location", what: "Shows a place in your maps app." }]; title = "Shows a location on a map"; body = c.text; },
+          script: () => { checks = [{ status: "fail", name: "Runs code", what: "This QR code tries to run code or open a file directly. There's no legitimate reason for that." }]; title = "This QR code tries to run code"; body = "Don't open it."; },
+          app: () => { checks = [{ status: "warn", name: `Opens an app (${c.scheme}:)`, what: "It hands information to an app on your phone. Only continue if you know which app and why." }]; title = `Opens an app using “${c.scheme}:”`; body = "Not a web link."; },
+          text: () => { const hasLink = /https?:\/\/|www\./i.test(c.text); checks = [{ status: hasLink ? "warn" : "pass", name: hasLink ? "Text containing a link" : "Plain text only", what: hasLink ? "The text includes a web address. Copy it into the box above to check it." : "Just text. It can't open anything on its own." }]; title = "Contains text, not a link"; body = c.text.length > 160 ? c.text.slice(0, 157) + "…" : c.text; }
+        };
+        ex[c.kind]();
+        const st = verdictOf(checks);
+        tag = st === "bad" ? "Don't use" : st === "warn" ? "Be careful" : "No warning signs";
+        dial.set({ value: st === "bad" ? "STOP" : st === "warn" ? "CHECK" : "OK", sub: "QR VERDICT", colour: st === "bad" ? "#ff8b77" : st === "warn" ? "#f3b75c" : "#6fd59c" });
+        out.append(verdict(st, tag, title, body, isExample));
+        if (c.kind !== "wifi") { const pr = panel("What the code contains"); const box = el("div", "qr-link"); box.append(el("code", null, String(raw).slice(0, 600))); const r = el("div", "genrow"); r.append(copyButton(String(raw), "Copy")); box.append(r); pr.append(box); extraPanels.push(pr); }
+      }
+      extraPanels.forEach(p => out.append(p));
+      const order = { fail: 0, warn: 1, info: 2, pass: 3 };
+      const pc = panel("What we checked", "Most serious first.");
+      pc.append(checkList(checks.length ? checks.slice().sort((a, b) => order[a.status] - order[b.status]) : [{ status: "pass", name: "No warning signs", what: "Nothing unusual in the link." }]));
+      out.append(pc);
+      out.append(stepsPanel("Staying safe with QR codes", "Share these with your team.", [
+        ["Check for stickers", "on parking meters, posters and menus. Scammers stick their own codes over the real ones."],
+        ["Be wary of QR codes in emails", "they're used to dodge email filters. Microsoft and banks don't ask you to scan codes to sign in."],
+        ["Type it yourself", "for payments and logins, go to the official website or app rather than following a code."],
+        ["If you entered details", "change that password straight away and tell your IT team."]
+      ]));
+      out.append(cta("Worried about QR phishing reaching your staff? Dragon Defence can run awareness training and tighten your email filtering."));
+    }
+
+    // ---------- Scanning ----------
+    function loadLib() {
+      if (window.jsQR) return Promise.resolve(window.jsQR);
+      if (!libP) libP = new Promise((res, rej) => { const s = document.createElement("script"); s.src = JSQR_URL; s.async = true; s.onload = () => window.jsQR ? res(window.jsQR) : rej(new Error("jsQR")); s.onerror = () => { libP = null; rej(new Error("load")); }; document.head.append(s); });
+      return libP;
+    }
+    async function decodeCanvas(ctx, w, h) {
+      if ("BarcodeDetector" in window) { try { const d = new window.BarcodeDetector({ formats: ["qr_code"] }); const r = await d.detect(ctx.canvas); if (r && r[0] && r[0].rawValue) return r[0].rawValue; } catch {} }
+      const jsQR = await loadLib();
+      const img = ctx.getImageData(0, 0, w, h);
+      const r = jsQR(img.data, w, h, { inversionAttempts: "attemptBoth" });
+      return r && r.data ? r.data : null;
+    }
+    function stopCam() { cancelAnimationFrame(raf); raf = 0; if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } const v = document.getElementById("qr-cam"); if (v) v.closest(".qr-cam-wrap").remove(); }
+    async function startCam(btn) {
+      if (stream) return;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { errorBox("The camera isn't available here", "Use Upload a photo instead, or take a screenshot of the QR code and upload that."); return; }
+      try { await loadLib(); } catch { errorBox("The scanner couldn't load", "Check your connection, or paste the link into the box instead."); return; }
+      try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 } }, audio: false }); }
+      catch (e) { stream = null; errorBox("The camera couldn't start", e && e.name === "NotAllowedError" ? "Camera access was refused. Allow it in Settings → Safari → Camera (or for this app), or use Upload a photo instead." : "Use Upload a photo instead, or take a screenshot of the QR code and upload that."); return; }
+      out.replaceChildren();
+      const wrap = el("div", "qr-cam-wrap panel");
+      const v = el("video"); v.id = "qr-cam"; v.setAttribute("playsinline", ""); v.muted = true; v.srcObject = stream;
+      const frame = el("div", "qr-frame"); frame.setAttribute("aria-hidden", "true");
+      const stage = el("div", "qr-stage"); stage.append(v, frame);
+      const stop = el("button", "copybtn", "Stop scanning"); stop.type = "button"; stop.addEventListener("click", stopCam);
+      wrap.append(el("p", "hint", "Point the camera at the QR code. Nothing is opened."), stage, stop);
+      out.append(wrap); wrap.scrollIntoView({ behavior: "smooth", block: "center" });
+      dial.set({ scanning: true });
+      try { await v.play(); } catch {}
+      const cv = document.createElement("canvas"), ctx = cv.getContext("2d", { willReadFrequently: true });
+      let last = 0;
+      const tick = async (t) => {
+        if (!stream) return;
+        if (current !== "qr") { stopCam(); return; }
+        if (t - last > 180 && v.readyState >= 2 && v.videoWidth) {
+          last = t;
+          const scale = Math.min(1, 720 / v.videoWidth); cv.width = Math.round(v.videoWidth * scale); cv.height = Math.round(v.videoHeight * scale);
+          ctx.drawImage(v, 0, 0, cv.width, cv.height);
+          const data = await decodeCanvas(ctx, cv.width, cv.height).catch(() => null);
+          if (data && stream) { stopCam(); try { navigator.vibrate && navigator.vibrate(60); } catch {} render(data, false); return; }
+        }
+        raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    }
+    async function fromFile(file) {
+      if (!file) return;
+      loading("Reading the QR code…"); dial.set({ scanning: true });
+      try {
+        const url = URL.createObjectURL(file);
+        const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+        let found = null;
+        for (const max of [1600, 1000, 2400, 600]) {
+          const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+          const cv = document.createElement("canvas"); cv.width = Math.round(img.naturalWidth * s); cv.height = Math.round(img.naturalHeight * s);
+          const ctx = cv.getContext("2d", { willReadFrequently: true }); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height); ctx.drawImage(img, 0, 0, cv.width, cv.height);
+          found = await decodeCanvas(ctx, cv.width, cv.height);
+          if (found) break;
+        }
+        URL.revokeObjectURL(url);
+        if (!found) { dial.set(); return errorBox("No QR code found in that picture", "Crop closer to the code, make sure it's in focus and well lit, then try again."); }
+        render(found, false);
+      } catch (e) { dial.set(); errorBox("Couldn't read that picture", String(e && e.message) === "load" || String(e && e.message) === "jsQR" ? "The scanner couldn't load. Check your connection, or paste the link into the box instead." : "Try a different photo or a screenshot of the QR code."); }
+    }
+    const SAMPLE = "https://microsoft365.login-verify.co/secure/auth?ref=parking-fine&user=you%40company.co.uk";
+    const SAMPLE_LIVE = [{ status: "fail", name: "Registered 4 days ago", what: "login-verify.co was registered 4 days ago. Most scam sites are only days or weeks old." }];
+    function mount() {
+      const wrap = el("div", "qr-actions");
+      const camB = el("button", "primary", "Scan with camera"); camB.type = "button"; camB.addEventListener("click", () => startCam(camB));
+      const fileIn = el("input"); fileIn.type = "file"; fileIn.accept = "image/*"; fileIn.id = "qr-file"; fileIn.className = "sr";
+      fileIn.addEventListener("change", () => { const f = fileIn.files && fileIn.files[0]; fileIn.value = ""; stopCam(); fromFile(f); });
+      const fileL = el("label", "ghostbtn", "Upload a photo"); fileL.htmlFor = "qr-file"; fileL.tabIndex = 0; fileL.setAttribute("role", "button");
+      fileL.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileIn.click(); } });
+      wrap.append(camB, fileL, fileIn);
+      const f = searchForm({ id: "qr-paste", label: "Or paste a link to check", placeholder: "…or paste a link or QR text", button: "Check", inputmode: "url" });
+      f.form.classList.add("qr-paste");
+      f.form.addEventListener("submit", (e) => { e.preventDefault(); const v = f.input.value.trim(); if (!v) { f.input.focus(); return; } stopCam(); render(v, false); });
+      const box = el("div", "qr-box"); box.append(wrap, f.form);
+      dial = buildHero({ eyebrow: "QR code check", title: 'Scan it here <span class="hl">before you tap it</span>.', lede: "Shows where a QR code really leads and flags the warning signs of QR phishing (“quishing”), without opening the link. Works with the camera, a photo or a screenshot.", form: box,
+        fine: [document.createTextNode("The link is never opened. Only its domain name is looked up. "), exLink("See an example result", () => { stopCam(); render(SAMPLE, true, SAMPLE_LIVE); })] });
+      render(SAMPLE, true, SAMPLE_LIVE);
+      foot.replaceChildren(el("div", null, "QR codes are read on your device. Checks look at the address itself, whether the domain exists and how old it is. Shortened links can't be followed from here, and no check can prove a page is genuine."));
+    }
+    window.addEventListener("hashchange", () => { if (stream && location.hash !== "#qr") stopCam(); });
+    document.addEventListener("visibilitychange", () => { if (document.hidden && stream) stopCam(); });
+    return { mount, classify, urlChecks };
+  })();
+
+
+
+  // ================= Home =================
+  const Home = (() => {
+    const ART = {
+      breach: '<svg viewBox="0 0 48 48" fill="none" stroke="#f29a2e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="11" width="36" height="26" rx="4"/><path d="M7 13l17 13 17-13"/><circle cx="37" cy="35" r="8" fill="#1a2633" stroke="#ff8b77"/><path d="M37 31v4.5M37 38.6v.2" stroke="#ff8b77"/></svg>',
+      password: '<svg viewBox="0 0 48 48" fill="none" stroke="#f29a2e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="21" width="30" height="21" rx="4"/><path d="M15 21v-6a9 9 0 0118 0v6"/><circle cx="17" cy="31.5" r="1.6" fill="#f29a2e"/><circle cx="24" cy="31.5" r="1.6" fill="#f29a2e"/><circle cx="31" cy="31.5" r="1.6" fill="#f29a2e"/></svg>',
+      qr: '<svg viewBox="0 0 48 48" fill="none" stroke="#f29a2e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="12" height="12" rx="1.5"/><rect x="29" y="7" width="12" height="12" rx="1.5"/><rect x="7" y="29" width="12" height="12" rx="1.5"/><path d="M29 29h5v5M41 29v.1M29 41h.1M35 41h6v-6"/></svg>'
+    };
+    const TOOLS = [
+      { id: "breach", q: "Has my email been leaked?", title: "Email breach check", text: "Find out if an email address appears in known data breaches or leaked dumps, what was exposed, when, and what to do next." },
+      { id: "password", q: "Has my password been leaked?", title: "Password check", text: "Checks a password against over a billion leaked passwords without ever sending it, rates how fast it could be cracked, and makes strong new ones." },
+      { id: "qr", q: "Is this QR code safe to tap?", title: "QR code check", text: "Scan a QR code with the camera or upload a photo to see where it really goes and spot QR phishing before anyone taps it." }
+    ];
+    function mount() {
+      heroEl.replaceChildren();
+      const left = el("div");
+      left.append(el("p", "eyebrow", "Dragon Defence Security Tools"));
+      const h = el("h1"); h.innerHTML = 'Three free checks. <span class="hl">Seconds each.</span> Know where you stand.'; left.append(h);
+      left.append(el("p", "lede", "Check whether your email or password has turned up in a data breach, and whether a QR code is safe to tap. Everything runs in your browser and nothing you type is stored."));
+      const ctas = el("div", "hero-cta");
+      const a1 = el("a", "solid", "Check an email"); a1.href = "#breach"; a1.dataset.route = "breach";
+      const a2 = el("a", "ghost", "Scan a QR code"); a2.href = "#qr"; a2.dataset.route = "qr";
+      ctas.append(a1, a2); left.append(ctas);
+      const logo = el("div", "home-hero-logo"); const img = el("img"); img.src = "logo-mark.png"; img.alt = ""; logo.append(img);
+      heroEl.append(left, logo);
+      out.replaceChildren();
+      const grid = el("div", "tool-cards");
+      TOOLS.forEach(t => {
+        const a = el("a", "tcard"); a.href = "#" + t.id; a.dataset.route = t.id;
+        const art = el("div", "art"); art.innerHTML = ART[t.id]; art.setAttribute("aria-hidden", "true");
+        a.append(art, el("span", "q", t.q), el("b", null, t.title), el("p", null, t.text), el("span", "go", "Run the check →"));
+        grid.append(a);
+      });
+      out.append(grid);
+      out.append(cta("Want this done properly across your whole business? Dragon Defence offers straightforward, customer-first cyber security advice and protection."));
+      foot.replaceChildren(el("div", null, "These tools use public data sources and checks that run on your device. Results are a starting point, not a full security assessment."));
+    }
+    return { mount };
+  })();
+
+  // ================= Router =================
+  const ROUTES = { home: Home, breach: Breach, password: Password, qr: QR };
+  function go(route, push) {
+    if (!ROUTES[route]) route = "home";
+    if (route === current) return;
+    current = route;
+    document.querySelectorAll("nav.tools a, nav.tabbar a").forEach(a => { if (a.dataset.route === route) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    ROUTES[route].mount();
+    try { document.title = (route === "home" ? "Dragon Defence Security Tools" : TITLES[route] + " · Dragon Defence"); } catch {}
+    if (push) { try { if (location.hash !== "#" + route) history.pushState(null, "", "#" + route); } catch {} }
+    window.scrollTo({ top: 0 });
+  }
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest("a[data-route]"); if (!a) return;
+    e.preventDefault(); go(a.dataset.route, true);
+  });
+  window.addEventListener("hashchange", () => go(location.hash.slice(1), false));
+  window.addEventListener("popstate", () => go(location.hash.slice(1) || "home", false));
+  go((location.hash || "").slice(1) || "home", false);
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+}
+</script>
+</body>
+</html>
